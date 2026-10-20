@@ -6,8 +6,17 @@ using FuelQ.Models;
 
 namespace FuelQ.Simulation;
 
+/// <summary>
+/// Simulation-table engine for an s-server FCFS queue (multi-server Lindley recursion):
+/// each vehicle, in arrival order, takes the pump that frees up earliest.
+/// Every interarrival and service time is produced by inverse transform from the
+/// random number shown in the table, so each row can be reproduced by hand.
+/// </summary>
 public static class GeneralDESimulator
 {
+    // Bounds keep inverse transforms finite after rounding R to 4 decimals
+    private const double MinR = 0.0001, MaxR = 0.9999;
+
     public static DESSimulationResult Run(DESSimConfig cfg)
     {
         var rng = new Random(cfg.RandomSeed);
@@ -26,38 +35,34 @@ public static class GeneralDESimulator
         double[] serverFreeAt = new double[numServers];
         double[] serverBusyDuration = new double[numServers];
 
-        var customerRows = new List<CustomerEventRow>(maxCustomers);
-        var timeline     = new List<(double Time, int QLen)>(maxCustomers * 2 + 1);
+        var customerRows = new List<CustomerEventRow>(Math.Min(maxCustomers, 100_000));
 
         // Build distribution instances once — reused across all events
         IDistribution? arrDistInst = BuildDistInstance(cfg.ArrivalDist);
         IDistribution? svcDistInst = BuildDistInstance(cfg.ServiceDist);
 
-        double currentArrival = 0;
-        // track queue length with a counter instead of O(n) LINQ scan
-        int queueCounter = 0;
+        // Service-start times of vehicles still waiting in the queue
+        var waiting = new PriorityQueue<double, double>();
+        // Q(t) changes: +1 when a vehicle joins the queue, −1 when its service begins
+        var queueChanges = new List<(double Time, int Delta)>();
 
-        timeline.Add((0, 0));
+        double currentArrival = 0;
+        bool stoppedByDurationCap = false;
 
         for (int i = 1; i <= maxCustomers; i++)
         {
-            // Sample Interarrival Time with zero-guard applied after rounding
-            double rArr = Math.Round(rng.NextDouble(), 4);
-            if (rArr <= 0) rArr = 0.0001;
-            double iat = SampleDist(cfg.ArrivalDist, rArr, rng, arrDistInst);
-
-            if (i == 1)
-                currentArrival = iat;
-            else
-                currentArrival += iat;
+            double rArr = Math.Clamp(Math.Round(rng.NextDouble(), 4), MinR, MaxR);
+            double iat = SampleDist(cfg.ArrivalDist, rArr, arrDistInst);
+            currentArrival += iat;
 
             if (currentArrival > maxDuration)
+            {
+                stoppedByDurationCap = true;
                 break;
+            }
 
-            // Sample Service Time (same post-round guard)
-            double rSvc = Math.Round(rng.NextDouble(), 4);
-            if (rSvc <= 0) rSvc = 0.0001;
-            double svc = SampleDist(cfg.ServiceDist, rSvc, rng, svcDistInst);
+            double rSvc = Math.Clamp(Math.Round(rng.NextDouble(), 4), MinR, MaxR);
+            double svc = SampleDist(cfg.ServiceDist, rSvc, svcDistInst);
 
             // Find earliest available server
             int bestServer = 0;
@@ -76,18 +81,24 @@ public static class GeneralDESimulator
             double svcEnds = svcBegins + svc;
             double timeInSystem = waitInQueue + svc;
 
-            // Queue length at arrival = current counter value (customers waiting or being served)
-            // If this customer waits, increment counter; it decrements when service begins
-            int qLenAtArrival = queueCounter;
+            // Vehicles whose service has started by now have left the queue
+            while (waiting.Count > 0 && waiting.Peek() <= currentArrival)
+                waiting.Dequeue();
+            int qLenAtArrival = waiting.Count;
+
             if (waitInQueue > 0)
-                queueCounter++; // customer joins queue
+            {
+                waiting.Enqueue(svcBegins, svcBegins);
+                queueChanges.Add((currentArrival, +1));
+                queueChanges.Add((svcBegins, -1));
+            }
 
             double idleTime = Math.Max(0, currentArrival - earliestFree);
 
             serverFreeAt[bestServer] = svcEnds;
             serverBusyDuration[bestServer] += svc;
 
-            var row = new CustomerEventRow
+            customerRows.Add(new CustomerEventRow
             {
                 CustomerNumber = i,
                 ArrivalRandom = rArr,
@@ -102,38 +113,29 @@ public static class GeneralDESimulator
                 QueueLengthOnArrival = qLenAtArrival,
                 AssignedServer = bestServer + 1,
                 IdleTimeOfServer = Math.Round(idleTime, 4)
-            };
-
-            customerRows.Add(row);
-            if (waitInQueue > 0 && queueCounter > 0)
-                queueCounter--; // customer is now being served, leaves queue
-
-            // Record timeline points
-            timeline.Add((currentArrival, qLenAtArrival + (waitInQueue > 0 ? 1 : 0)));
-            timeline.Add((svcBegins, qLenAtArrival));
+            });
         }
-
-        // Timeline is already in chronological order (events appended sequentially).
-        // Sorting would be O(n log n) for no benefit — skip it.
 
         int totalServed = customerRows.Count;
         double totalSimTime = totalServed > 0 ? customerRows.Max(c => c.TimeServiceEnds) : 1.0;
         if (totalSimTime <= 0) totalSimTime = 1.0;
+
+        // Q(t) as a time-ordered step function; area under it gives the time-average Lq
+        var (timeline, queueArea) = BuildQueueTimeline(queueChanges);
+        int maxQLen = timeline.Max(t => t.QLen);
 
         double avgIat = totalServed > 0 ? customerRows.Average(c => c.InterarrivalTime) : 0;
         double avgSvc = totalServed > 0 ? customerRows.Average(c => c.ServiceTime) : 0;
         double avgWq  = totalServed > 0 ? customerRows.Average(c => c.WaitingTime) : 0;
         double avgW   = totalServed > 0 ? customerRows.Average(c => c.TimeInSystem) : 0;
         double maxWq  = totalServed > 0 ? customerRows.Max(c => c.WaitingTime) : 0;
-        int maxQLen   = totalServed > 0 ? customerRows.Max(c => c.QueueLengthOnArrival) : 0;
 
-        // Time-average queue length and system length
-        double simLambda = avgIat > 0 ? 1.0 / avgIat : 0;
-        double simLq = simLambda * avgWq;
-        double simL  = simLambda * avgW;
-
+        // Measured time averages: Lq from the area under Q(t); L adds the vehicles in service
         double totalBusy = serverBusyDuration.Sum();
-        double avgUtil = (totalBusy / (numServers * totalSimTime));
+        double simLq = queueArea / totalSimTime;
+        double simL  = (queueArea + totalBusy) / totalSimTime;
+
+        double avgUtil = totalBusy / (numServers * totalSimTime);
         if (avgUtil > 1.0) avgUtil = 1.0;
 
         double throughput = totalSimTime > 0 ? totalServed / totalSimTime : 0;
@@ -165,14 +167,39 @@ public static class GeneralDESimulator
             Throughput: throughput,
             TotalCustomersServed: totalServed,
             TotalSimTime: totalSimTime,
-            TimeUnitStr: timeUnitStr
+            TimeUnitStr: timeUnitStr,
+            StoppedByDurationCap: stoppedByDurationCap,
+            CustomerLimit: maxCustomers
         );
     }
 
-    private static double SampleDist(DistConfig dist, double u, Random rng, IDistribution? distInstance)
+    /// <summary>
+    /// Sorts the +1/−1 queue changes by time and expands them into step-function points
+    /// (two points per change, so the line chart draws vertical steps).
+    /// </summary>
+    private static (List<(double Time, int QLen)> Timeline, double Area) BuildQueueTimeline(
+        List<(double Time, int Delta)> changes)
     {
-        // For distributions that need rng (Normal, Gamma), use the pre-built instance.
-        // For inverse-transform distributions (Exp, Uniform), use u directly for reproducibility.
+        // At equal times, process service starts (−1) before arrivals (+1)
+        changes.Sort((a, b) => a.Time != b.Time ? a.Time.CompareTo(b.Time) : a.Delta.CompareTo(b.Delta));
+
+        var timeline = new List<(double Time, int QLen)>(changes.Count * 2 + 1) { (0, 0) };
+        int q = 0;
+        double lastT = 0, area = 0;
+        foreach (var (t, delta) in changes)
+        {
+            area += q * (t - lastT);
+            lastT = t;
+            timeline.Add((t, q));
+            q += delta;
+            timeline.Add((t, q));
+        }
+        return (timeline, area);
+    }
+
+    private static double SampleDist(DistConfig dist, double u, IDistribution? distInstance)
+    {
+        // Every distribution uses inverse transform on u, so the displayed R produced the value.
         switch (dist.Type)
         {
             case DistType.Exponential:
@@ -185,9 +212,10 @@ public static class GeneralDESimulator
                 return min + u * (max - min);
 
             case DistType.Normal:
+                return ((NormalDistribution)distInstance!).Quantile(u);
+
             case DistType.Gamma:
-                // distInstance is guaranteed non-null for these cases
-                return Math.Max(0.01, distInstance!.Sample(rng));
+                return ((GammaDistribution)distInstance!).Quantile(u);
 
             default:
                 return 1.0;
@@ -206,6 +234,40 @@ public static class GeneralDESimulator
                 dist.Param2 > 0 ? dist.Param2 : 1.0),
             _ => null
         };
+    }
+
+    /// <summary>
+    /// Theoretical mean and variance of a configured distribution, using the same
+    /// parameter fallbacks as the samplers. Normal moments are untruncated, so they
+    /// drift from the simulation when σ is large relative to the mean.
+    /// </summary>
+    public static (double Mean, double Variance) Moments(DistConfig dist)
+    {
+        switch (dist.Type)
+        {
+            case DistType.Exponential:
+            {
+                double mean = dist.Param1 > 0 ? dist.Param1 : 1.0;
+                return (mean, mean * mean);
+            }
+            case DistType.Uniform:
+            {
+                double a = dist.Param1;
+                double b = dist.Param2 > a ? dist.Param2 : a + 1.0;
+                return ((a + b) / 2.0, (b - a) * (b - a) / 12.0);
+            }
+            case DistType.Gamma:
+            {
+                double k = dist.Param1 > 0 ? dist.Param1 : 2.0;
+                double theta = dist.Param2 > 0 ? dist.Param2 : 1.0;
+                return (k * theta, k * theta * theta);
+            }
+            default: // Normal
+            {
+                double std = dist.Param2 > 0 ? dist.Param2 : 1.0;
+                return (dist.Param1, std * std);
+            }
+        }
     }
 
     private static List<HourlySummaryRow> GenerateHourlySummary(
@@ -259,7 +321,7 @@ public static class GeneralDESimulator
 
             list.Add(new HourlySummaryRow
             {
-                HourPeriod        = $"Period {h + 1} ({tStart:F0}\u2013{tEnd:F0} {unit})",
+                HourPeriod        = $"Period {h + 1} ({tStart:F0}–{tEnd:F0} {unit})",
                 Arrivals          = arrCount[h],
                 Departures        = depCount[h],
                 AvgWait           = Math.Round(avgW, 2),
@@ -277,56 +339,10 @@ public static class GeneralDESimulator
     {
         var list = new List<TheoreticalComparisonRow>();
 
-        double theoLambda, theoMu;
-        double arrVar, svcVar;
-
-        // Extract theoretical distribution parameters
-        if (cfg.ArrivalDist.Type == DistType.Exponential)
-        {
-            double mean = cfg.ArrivalDist.Param1 > 0 ? cfg.ArrivalDist.Param1 : 1.0;
-            theoLambda = 1.0 / mean;
-            arrVar = mean * mean;
-        }
-        else if (cfg.ArrivalDist.Type == DistType.Uniform)
-        {
-            double a = cfg.ArrivalDist.Param1, b = cfg.ArrivalDist.Param2;
-            double mean = (a + b) / 2.0;
-            theoLambda = mean > 0 ? 1.0 / mean : 1.0;
-            arrVar = Math.Pow(b - a, 2) / 12.0;
-        }
-        else
-        {
-            double mean = cfg.ArrivalDist.Param1 > 0 ? cfg.ArrivalDist.Param1 : 1.0;
-            theoLambda = 1.0 / mean;
-            arrVar = Math.Pow(cfg.ArrivalDist.Param2, 2);
-        }
-
-        if (cfg.ServiceDist.Type == DistType.Exponential)
-        {
-            double mean = cfg.ServiceDist.Param1 > 0 ? cfg.ServiceDist.Param1 : 1.0;
-            theoMu = 1.0 / mean;
-            svcVar = mean * mean;
-        }
-        else if (cfg.ServiceDist.Type == DistType.Uniform)
-        {
-            double a = cfg.ServiceDist.Param1, b = cfg.ServiceDist.Param2;
-            double mean = (a + b) / 2.0;
-            theoMu = mean > 0 ? 1.0 / mean : 1.0;
-            svcVar = Math.Pow(b - a, 2) / 12.0;
-        }
-        else if (cfg.ServiceDist.Type == DistType.Gamma)
-        {
-            double k = cfg.ServiceDist.Param1, theta = cfg.ServiceDist.Param2;
-            double mean = k * theta;
-            theoMu = mean > 0 ? 1.0 / mean : 1.0;
-            svcVar = k * theta * theta;
-        }
-        else
-        {
-            double mean = cfg.ServiceDist.Param1 > 0 ? cfg.ServiceDist.Param1 : 1.0;
-            theoMu = 1.0 / mean;
-            svcVar = Math.Pow(cfg.ServiceDist.Param2, 2);
-        }
+        var (arrMean, arrVar) = Moments(cfg.ArrivalDist);
+        var (svcMean, svcVar) = Moments(cfg.ServiceDist);
+        double theoLambda = arrMean > 0 ? 1.0 / arrMean : 1.0;
+        double theoMu     = svcMean > 0 ? 1.0 / svcMean : 1.0;
 
         // Calculate theoretical model
         QueueMetrics? theo;
@@ -354,9 +370,13 @@ public static class GeneralDESimulator
             AddComp(list, "Server Utilization", "ρ", $"{simRho * 100:F1}%", $"{theo.Rho * 100:F1}%", simRho, theo.Rho);
             AddComp(list, "Avg Waiting Time in Queue", "Wq", $"{simWq:F4} {unit}", $"{theo.Wq:F4} {unit}", simWq, theo.Wq);
             AddComp(list, "Avg Time in System", "W", $"{simW:F4} {unit}", $"{theo.W:F4} {unit}", simW, theo.W);
-            AddComp(list, "Avg Queue Length", "Lq", $"{simLq:F4} veh", $"{theo.Lq:F4} veh", simLq, theo.Lq);
-            AddComp(list, "Avg System Length", "L", $"{simL:F4} veh", $"{theo.L:F4} veh", simL, theo.L);
+            AddComp(list, "Avg Queue Length (time avg)", "Lq", $"{simLq:F4} veh", $"{theo.Lq:F4} veh", simLq, theo.Lq);
+            AddComp(list, "Avg System Length (time avg)", "L", $"{simL:F4} veh", $"{theo.L:F4} veh", simL, theo.L);
         }
+
+        // Little's Law check: measured time-average L against λ·W from the per-vehicle times
+        double littleL = simLambda * simW;
+        AddComp(list, "Little's Law check (L vs λ·W)", "L = λW", $"{simL:F4} veh", $"{littleL:F4} veh (λ·W)", simL, littleL);
 
         return list;
     }
@@ -383,13 +403,16 @@ public static class GeneralDESimulator
         int binCount = 6;
         double binWidth = maxW > 0 ? maxW / binCount : 1.0;
 
+        // Single pass: bin index = floor(w / width), with the maximum folded into the last bin
+        var counts = new int[binCount];
+        foreach (var r in rows)
+            counts[Math.Min((int)(r.WaitingTime / binWidth), binCount - 1)]++;
+
         for (int b = 0; b < binCount; b++)
         {
-            double lo = b * binWidth;
             double hi = (b + 1) * binWidth;
-            int count = rows.Count(r => r.WaitingTime >= lo && (b == binCount - 1 ? r.WaitingTime <= hi : r.WaitingTime < hi));
-            double pct = (double)count / rows.Count * 100.0;
-            list.Add((Math.Round(hi, 2), count, Math.Round(pct, 1)));
+            double pct = (double)counts[b] / rows.Count * 100.0;
+            list.Add((Math.Round(hi, 2), counts[b], Math.Round(pct, 1)));
         }
 
         return list;

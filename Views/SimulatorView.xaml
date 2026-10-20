@@ -3,14 +3,16 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:controls="clr-namespace:FuelQ.Controls"
              Background="{StaticResource CanvasBackground}"
-             FontFamily="Segoe UI">
+             FontFamily="{StaticResource BodyFont}">
     <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
         <StackPanel Margin="28,20,28,32">
 
             <!-- ══ PAGE HEADER ══ -->
-            <TextBlock Text="Shell Petrol Pump — Discrete Event Simulator (DES)" Style="{StaticResource PageTitle}" Margin="0,0,0,4"/>
-            <TextBlock Text="Stochastic event-by-event progression simulating individual customer vehicle arrivals, pump allocation, queuing, fueling, and departures."
-                       Foreground="{StaticResource TextSecondary}" FontSize="12.5" Margin="0,0,0,16"/>
+            <TextBlock Text="Discrete Event Simulator" Style="{StaticResource PageTitle}" Margin="0,0,0,4"/>
+            <TextBlock Text="Instead of a formula, send thousands of random vehicles through the pumps one at a time and measure what happens."
+                       Foreground="{StaticResource TextSecondary}" FontSize="13" Margin="0,0,0,16"/>
+
+            <controls:StepGuide Steps="Set the scene :: Number of pumps, how often vehicles arrive and how long fueling takes.|Run it :: Each vehicle gets a random arrival gap and fueling time, then takes the first free pump.|Compare :: The table checks the simulation against theory. Small differences are normal randomness."/>
 
             <!-- ══ CONFIGURATION ACCORDION / CARDS ══ -->
             <Grid Margin="0,0,0,16">
@@ -53,11 +55,11 @@
                             </Grid.ColumnDefinitions>
                             <StackPanel Grid.Column="0">
                                 <TextBlock Text="CUSTOMER LIMIT (N)" Style="{StaticResource FieldLabel}"/>
-                                <TextBox x:Name="TbSimCustomerLimit" Text="25"/>
+                                <TextBox x:Name="TbSimCustomerLimit" Text="20000"/>
                             </StackPanel>
                             <StackPanel Grid.Column="2">
                                 <TextBlock Text="DURATION CAP (T)" Style="{StaticResource FieldLabel}"/>
-                                <TextBox x:Name="TbSimDurationCap" Text="480"/>
+                                <TextBox x:Name="TbSimDurationCap" Text="10000000"/>
                             </StackPanel>
                         </Grid>
 
@@ -111,6 +113,7 @@
                             <StackPanel Grid.Column="2">
                                 <TextBlock Text="STD DEV (σ_a)" Style="{StaticResource FieldLabel}"/>
                                 <TextBox x:Name="TbSimArrNormStd" Text="1.0"/>
+                                <TextBlock Text="Negative draws are clipped to 0; keep σ ≤ mean/3 so theory matches" TextWrapping="Wrap" FontSize="10.5" Foreground="{StaticResource TextMuted}" Margin="0,2,0,0"/>
                             </StackPanel>
                         </Grid>
                     </StackPanel>
@@ -146,6 +149,7 @@
                             <StackPanel Grid.Column="2">
                                 <TextBlock Text="STD DEV (σ_s)" Style="{StaticResource FieldLabel}"/>
                                 <TextBox x:Name="TbSimSvcNormStd" Text="0.8"/>
+                                <TextBlock Text="Negative draws are clipped to 0; keep σ ≤ mean/3 so theory matches" TextWrapping="Wrap" FontSize="10.5" Foreground="{StaticResource TextMuted}" Margin="0,2,0,0"/>
                             </StackPanel>
                         </Grid>
 
@@ -196,84 +200,85 @@
 
                 <!-- ══ AGGREGATE PERFORMANCE MEASURES CARDS ══ -->
                 <TextBlock Text="SIMULATION PERFORMANCE MEASURES" FontSize="11" FontWeight="Bold" Foreground="{StaticResource TextSecondary}" Margin="0,0,0,8"/>
+                <TextBlock x:Name="TxtSimCapWarning" Visibility="Collapsed" TextWrapping="Wrap" FontSize="12" Foreground="{StaticResource AccentOrange}" Margin="0,0,0,10"/>
                 <UniformGrid Columns="5" Rows="2" Margin="0,0,0,16">
                     <!-- Avg Wait -->
-                    <Border Background="{StaticResource CardSurface}" BorderBrush="{StaticResource CardBorder}" BorderThickness="1" CornerRadius="8" Padding="14,12" Margin="4">
+                    <Border Style="{StaticResource KpiTile}">
                         <StackPanel>
-                            <TextBlock Text="AVG WAITING TIME (Wq)" FontSize="9.5" FontWeight="Bold" Foreground="{StaticResource TextSecondary}"/>
-                            <TextBlock x:Name="SimMetricAvgWq" Text="0.00" FontSize="20" FontWeight="Bold" Foreground="{StaticResource AccentCyanBrush}"/>
+                            <TextBlock Text="AVG WAITING TIME (Wq)" Style="{StaticResource KpiLabel}"/>
+                            <TextBlock x:Name="SimMetricAvgWq" Text="0.00" Style="{StaticResource MeterValue}" Foreground="{StaticResource AccentCyanBrush}"/>
                             <TextBlock x:Name="SimMetricAvgWqUnit" Text="min in queue" FontSize="10" Foreground="{StaticResource TextMuted}"/>
                         </StackPanel>
                     </Border>
                     <!-- Max Wait -->
-                    <Border Background="{StaticResource CardSurface}" BorderBrush="{StaticResource CardBorder}" BorderThickness="1" CornerRadius="8" Padding="14,12" Margin="4">
+                    <Border Style="{StaticResource KpiTile}">
                         <StackPanel>
-                            <TextBlock Text="MAX WAITING TIME" FontSize="9.5" FontWeight="Bold" Foreground="{StaticResource TextSecondary}"/>
-                            <TextBlock x:Name="SimMetricMaxWq" Text="0.00" FontSize="20" FontWeight="Bold" Foreground="{StaticResource AccentOrange}"/>
+                            <TextBlock Text="MAX WAITING TIME" Style="{StaticResource KpiLabel}"/>
+                            <TextBlock x:Name="SimMetricMaxWq" Text="0.00" Style="{StaticResource MeterValue}" Foreground="{StaticResource AccentOrange}"/>
                             <TextBlock x:Name="SimMetricMaxWqUnit" Text="min peak delay" FontSize="10" Foreground="{StaticResource TextMuted}"/>
                         </StackPanel>
                     </Border>
                     <!-- Avg Queue Len -->
-                    <Border Background="{StaticResource CardSurface}" BorderBrush="{StaticResource CardBorder}" BorderThickness="1" CornerRadius="8" Padding="14,12" Margin="4">
+                    <Border Style="{StaticResource KpiTile}">
                         <StackPanel>
-                            <TextBlock Text="AVG QUEUE LENGTH (Lq)" FontSize="9.5" FontWeight="Bold" Foreground="{StaticResource TextSecondary}"/>
-                            <TextBlock x:Name="SimMetricAvgLq" Text="0.00" FontSize="20" FontWeight="Bold" Foreground="{StaticResource TextPrimary}"/>
+                            <TextBlock Text="AVG QUEUE LENGTH (Lq)" Style="{StaticResource KpiLabel}"/>
+                            <TextBlock x:Name="SimMetricAvgLq" Text="0.00" Style="{StaticResource MeterValue}" Foreground="{StaticResource TextPrimary}"/>
                             <TextBlock Text="vehicles in queue" FontSize="10" Foreground="{StaticResource TextMuted}"/>
                         </StackPanel>
                     </Border>
                     <!-- Max Queue Len -->
-                    <Border Background="{StaticResource CardSurface}" BorderBrush="{StaticResource CardBorder}" BorderThickness="1" CornerRadius="8" Padding="14,12" Margin="4">
+                    <Border Style="{StaticResource KpiTile}">
                         <StackPanel>
-                            <TextBlock Text="MAX QUEUE LENGTH" FontSize="9.5" FontWeight="Bold" Foreground="{StaticResource TextSecondary}"/>
-                            <TextBlock x:Name="SimMetricMaxQLen" Text="0" FontSize="20" FontWeight="Bold" Foreground="{StaticResource AccentRed}"/>
+                            <TextBlock Text="MAX QUEUE LENGTH" Style="{StaticResource KpiLabel}"/>
+                            <TextBlock x:Name="SimMetricMaxQLen" Text="0" Style="{StaticResource MeterValue}" Foreground="{StaticResource AccentRed}"/>
                             <TextBlock Text="vehicles max queue" FontSize="10" Foreground="{StaticResource TextMuted}"/>
                         </StackPanel>
                     </Border>
                     <!-- Server Utilization -->
-                    <Border Background="{StaticResource CardSurface}" BorderBrush="{StaticResource CardBorder}" BorderThickness="1" CornerRadius="8" Padding="14,12" Margin="4">
+                    <Border Style="{StaticResource KpiTile}">
                         <StackPanel>
-                            <TextBlock Text="SERVER UTILIZATION (ρ)" FontSize="9.5" FontWeight="Bold" Foreground="{StaticResource TextSecondary}"/>
-                            <TextBlock x:Name="SimMetricRho" Text="0.0%" FontSize="20" FontWeight="Bold" Foreground="{StaticResource StatusGreenText}"/>
+                            <TextBlock Text="SERVER UTILIZATION (ρ)" Style="{StaticResource KpiLabel}"/>
+                            <TextBlock x:Name="SimMetricRho" Text="0.0%" Style="{StaticResource MeterValue}" Foreground="{StaticResource StatusGreenText}"/>
                             <TextBlock Text="Busy pump capacity" FontSize="10" Foreground="{StaticResource TextMuted}"/>
                         </StackPanel>
                     </Border>
                     <!-- Avg System Time W -->
-                    <Border Background="{StaticResource CardSurface}" BorderBrush="{StaticResource CardBorder}" BorderThickness="1" CornerRadius="8" Padding="14,12" Margin="4">
+                    <Border Style="{StaticResource KpiTile}">
                         <StackPanel>
-                            <TextBlock Text="AVG SYSTEM TIME (W)" FontSize="9.5" FontWeight="Bold" Foreground="{StaticResource TextSecondary}"/>
-                            <TextBlock x:Name="SimMetricAvgW" Text="0.00" FontSize="20" FontWeight="Bold" Foreground="{StaticResource TextPrimary}"/>
+                            <TextBlock Text="AVG SYSTEM TIME (W)" Style="{StaticResource KpiLabel}"/>
+                            <TextBlock x:Name="SimMetricAvgW" Text="0.00" Style="{StaticResource MeterValue}" Foreground="{StaticResource TextPrimary}"/>
                             <TextBlock x:Name="SimMetricAvgWUnit" Text="min total turnaround" FontSize="10" Foreground="{StaticResource TextMuted}"/>
                         </StackPanel>
                     </Border>
                     <!-- Avg System Length L -->
-                    <Border Background="{StaticResource CardSurface}" BorderBrush="{StaticResource CardBorder}" BorderThickness="1" CornerRadius="8" Padding="14,12" Margin="4">
+                    <Border Style="{StaticResource KpiTile}">
                         <StackPanel>
-                            <TextBlock Text="AVG SYSTEM LENGTH (L)" FontSize="9.5" FontWeight="Bold" Foreground="{StaticResource TextSecondary}"/>
-                            <TextBlock x:Name="SimMetricAvgL" Text="0.00" FontSize="20" FontWeight="Bold" Foreground="{StaticResource TextPrimary}"/>
+                            <TextBlock Text="AVG SYSTEM LENGTH (L)" Style="{StaticResource KpiLabel}"/>
+                            <TextBlock x:Name="SimMetricAvgL" Text="0.00" Style="{StaticResource MeterValue}" Foreground="{StaticResource TextPrimary}"/>
                             <TextBlock Text="vehicles in system" FontSize="10" Foreground="{StaticResource TextMuted}"/>
                         </StackPanel>
                     </Border>
                     <!-- Throughput -->
-                    <Border Background="{StaticResource CardSurface}" BorderBrush="{StaticResource CardBorder}" BorderThickness="1" CornerRadius="8" Padding="14,12" Margin="4">
+                    <Border Style="{StaticResource KpiTile}">
                         <StackPanel>
-                            <TextBlock Text="SYSTEM THROUGHPUT" FontSize="9.5" FontWeight="Bold" Foreground="{StaticResource TextSecondary}"/>
-                            <TextBlock x:Name="SimMetricThroughput" Text="0.00" FontSize="20" FontWeight="Bold" Foreground="{StaticResource StatusGreenText}"/>
+                            <TextBlock Text="SYSTEM THROUGHPUT" Style="{StaticResource KpiLabel}"/>
+                            <TextBlock x:Name="SimMetricThroughput" Text="0.00" Style="{StaticResource MeterValue}" Foreground="{StaticResource StatusGreenText}"/>
                             <TextBlock x:Name="SimMetricThroughputUnit" Text="vehicles / min" FontSize="10" Foreground="{StaticResource TextMuted}"/>
                         </StackPanel>
                     </Border>
                     <!-- Total Customers Served -->
-                    <Border Background="{StaticResource CardSurface}" BorderBrush="{StaticResource CardBorder}" BorderThickness="1" CornerRadius="8" Padding="14,12" Margin="4">
+                    <Border Style="{StaticResource KpiTile}">
                         <StackPanel>
-                            <TextBlock Text="CUSTOMERS PROCESSED" FontSize="9.5" FontWeight="Bold" Foreground="{StaticResource TextSecondary}"/>
-                            <TextBlock x:Name="SimMetricTotalServed" Text="0" FontSize="20" FontWeight="Bold" Foreground="{StaticResource AccentCyanBrush}"/>
+                            <TextBlock Text="CUSTOMERS PROCESSED" Style="{StaticResource KpiLabel}"/>
+                            <TextBlock x:Name="SimMetricTotalServed" Text="0" Style="{StaticResource MeterValue}" Foreground="{StaticResource AccentCyanBrush}"/>
                             <TextBlock Text="vehicles served" FontSize="10" Foreground="{StaticResource TextMuted}"/>
                         </StackPanel>
                     </Border>
                     <!-- Total Sim Clock -->
-                    <Border Background="{StaticResource CardSurface}" BorderBrush="{StaticResource CardBorder}" BorderThickness="1" CornerRadius="8" Padding="14,12" Margin="4">
+                    <Border Style="{StaticResource KpiTile}">
                         <StackPanel>
-                            <TextBlock Text="SIMULATION CLOCK" FontSize="9.5" FontWeight="Bold" Foreground="{StaticResource TextSecondary}"/>
-                            <TextBlock x:Name="SimMetricTotalTime" Text="0.00" FontSize="20" FontWeight="Bold" Foreground="#FBBF24"/>
+                            <TextBlock Text="SIMULATION CLOCK" Style="{StaticResource KpiLabel}"/>
+                            <TextBlock x:Name="SimMetricTotalTime" Text="0.00" Style="{StaticResource MeterValue}" Foreground="#FFC95C"/>
                             <TextBlock x:Name="SimMetricTotalTimeUnit" Text="min total elapsed" FontSize="10" Foreground="{StaticResource TextMuted}"/>
                         </StackPanel>
                     </Border>
@@ -291,7 +296,7 @@
                                 <DataGridTextColumn Header="Symbol" Binding="{Binding Symbol}" Width="80"/>
                                 <DataGridTextColumn Header="Simulated (DES)" Binding="{Binding SimulatedValue}" Width="160"/>
                                 <DataGridTextColumn Header="Theoretical" Binding="{Binding TheoreticalValue}" Width="160"/>
-                                <DataGridTextColumn Header="Delta Error %" Binding="{Binding ErrorDelta}" Width="*"/>
+                                <DataGridTextColumn Header="Difference vs theory" Binding="{Binding ErrorDelta}" Width="*"/>
                             </DataGrid.Columns>
                         </DataGrid>
                     </StackPanel>

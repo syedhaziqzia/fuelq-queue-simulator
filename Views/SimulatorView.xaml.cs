@@ -53,8 +53,8 @@ public partial class SimulatorView : UserControl
     {
         TbSimServers.Text = "2";
         CbSimTimeUnit.SelectedIndex = 0; // Minutes
-        TbSimCustomerLimit.Text = "25";
-        TbSimDurationCap.Text = "480";
+        TbSimCustomerLimit.Text = "20000";
+        TbSimDurationCap.Text = "10000000";
         TbSimSeed.Text = "42";
 
         CbSimArrDist.SelectedIndex = 0;
@@ -112,8 +112,8 @@ public partial class SimulatorView : UserControl
     private DESSimConfig BuildConfig()
     {
         int servers = int.TryParse(TbSimServers.Text, out int s) ? Math.Max(1, s) : 2;
-        int limit = int.TryParse(TbSimCustomerLimit.Text, out int n) ? Math.Max(1, n) : 25;
-        double duration = double.TryParse(TbSimDurationCap.Text, out double d) ? Math.Max(1.0, d) : 480.0;
+        int limit = int.TryParse(TbSimCustomerLimit.Text, out int n) ? Math.Max(1, n) : 20000;
+        double duration = double.TryParse(TbSimDurationCap.Text, out double d) ? Math.Max(1.0, d) : 10_000_000.0;
         int seed = int.TryParse(TbSimSeed.Text, out int sd) ? sd : 42;
 
         var unit = CbSimTimeUnit.SelectedIndex switch
@@ -175,6 +175,13 @@ public partial class SimulatorView : UserControl
     {
         string u = res.TimeUnitStr;
 
+        // Warn when the duration cap ended the run before the customer limit was reached
+        TxtSimCapWarning.Visibility = res.StoppedByDurationCap ? Visibility.Visible : Visibility.Collapsed;
+        TxtSimCapWarning.Text = res.StoppedByDurationCap
+            ? $"⚠ The duration cap stopped this run after {res.TotalCustomersServed:N0} of {res.CustomerLimit:N0} vehicles. " +
+              "Raise the cap (T) for the full run; short runs give noisy comparisons with theory."
+            : string.Empty;
+
         // KPI Badges
         SimMetricAvgWq.Text = res.AvgWaitingTime.ToString("F2");
         SimMetricAvgWqUnit.Text = $"{u} in queue";
@@ -211,7 +218,7 @@ public partial class SimulatorView : UserControl
             double[] ys = [.. res.QueueTimeline.Select(t => (double)t.QLen)];
             ChartTimeline.XAxisLabel = $"Time ({u})";
             ChartTimeline.YAxisLabel = "Queue Length (veh)";
-            ChartTimeline.SetSeries([(xs, ys, Color.FromRgb(0x38, 0xBD, 0xF8), "Q(t)")]);
+            ChartTimeline.SetSeries([(xs, ys, Color.FromRgb(0xFF, 0xB0, 0x20), "Q(t)")]);
         }
 
         if (res.WaitDistribution.Count > 0)

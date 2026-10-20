@@ -19,8 +19,8 @@ public partial class EmpiricalDataView : UserControl
     {
         _records = DatasetIngestionEngine.GenerateAndSave();
         RefreshGrid();
-        StatusRecords.Text    = $"● {_records.Count} records generated & saved";
-        StatusSession.Text    = "Oct 2026 Maskan Chowrangi Session";
+        StatusRecords.Text    = $"● {_records.Count} synthetic records generated & saved";
+        StatusSession.Text    = "Synthetic baseline (seed 2026), not field data";
         StatusOutliers.Visibility = Visibility.Collapsed;
         UpdateHistograms();
     }
@@ -37,6 +37,7 @@ public partial class EmpiricalDataView : UserControl
         _records = DatasetIngestionEngine.LoadFromCsv(dlg.FileName);
         RefreshGrid();
         StatusRecords.Text = $"● {_records.Count} records loaded from {System.IO.Path.GetFileName(dlg.FileName)}";
+        StatusSession.Text = "Loaded from CSV";
         StatusOutliers.Visibility = Visibility.Collapsed;
         UpdateHistograms();
     }
@@ -46,7 +47,7 @@ public partial class EmpiricalDataView : UserControl
         if (_records.Count == 0) { StatusRecords.Text = "No data loaded. Generate or load a CSV first."; return; }
         int n = OutlierDetector.Detect(_records);
         RefreshGrid();
-        StatusOutliers.Text = $"⚠ {n} outliers flagged ({n * 100.0 / _records.Count:F2}%)";
+        StatusOutliers.Text = $"⚠ {n} service-time outliers flagged ({n * 100.0 / _records.Count:F2}%); χ² still uses all inter-arrivals";
         StatusOutliers.Visibility = Visibility.Visible;
     }
 
@@ -124,9 +125,9 @@ public partial class EmpiricalDataView : UserControl
 
         ChiVerdict.Foreground = accept ? (Brush)FindResource("StatusGreenText") : (Brush)FindResource("StatusRedText");
         ChiVerdict.Text = accept
-            ? $"✓ H0 Accepted: Empirical Data Fits Exponential Distribution\n" +
+            ? $"✓ H0 Not Rejected: Inter-arrival times are consistent with an Exponential distribution\n" +
               $"At α = 0.05, χ² = {r.ChiSquareStat:F2} < critical {r.CriticalValue:F2} (p = {r.PValue:F3}). " +
-              $"Markovian Poisson arrival assumption is statistically justified."
+              $"The Poisson arrival assumption is not contradicted by this dataset."
             : $"✗ H0 Rejected: Data does not fit Exponential Distribution\n" +
               $"At α = 0.05, χ² = {r.ChiSquareStat:F2} ≥ critical {r.CriticalValue:F2} (p = {r.PValue:F3}).";
     }

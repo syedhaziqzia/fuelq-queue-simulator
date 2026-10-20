@@ -76,5 +76,7 @@ public record DESSimulationResult(
     double Throughput,
     int TotalCustomersServed,
     double TotalSimTime,
-    string TimeUnitStr
+    string TimeUnitStr,
+    bool StoppedByDurationCap = false, // run ended at the duration cap before reaching CustomerLimit
+    int CustomerLimit = 0
 );

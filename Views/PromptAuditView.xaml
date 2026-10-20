@@ -2,7 +2,7 @@
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              Background="{StaticResource CanvasBackground}"
-             FontFamily="Segoe UI">
+             FontFamily="{StaticResource BodyFont}">
     <ScrollViewer VerticalScrollBarVisibility="Auto">
         <StackPanel Margin="24,22,24,28">
 
@@ -26,7 +26,7 @@
                             <TextBlock Text="5 Phased Prompts" FontSize="9.5" Foreground="White" FontWeight="Bold"/>
                         </Border>
                     </StackPanel>
-                    <TextBlock Text="The structured prompts used to build FuelQ step-by-step, created from our Modeling &amp; Simulation lecture notes, formulas, and Shell Maskan field observations."
+                    <TextBlock Text="The structured prompts used to build FuelQ step-by-step, created from our Modeling &amp; Simulation lecture notes, formulas, and the Shell Maskan forecourt setting."
                                Foreground="{StaticResource TextSecondary}" FontSize="12" Margin="0,0,0,16" TextWrapping="Wrap"/>
 
                     <!-- PROMPT 1: UI & Layout Shell -->
@@ -38,8 +38,8 @@
                                     <ColumnDefinition Width="*"/>
                                     <ColumnDefinition Width="Auto"/>
                                 </Grid.ColumnDefinitions>
-                                <Border Grid.Column="0" Background="#1E3A8A" CornerRadius="4" Padding="6,2" Margin="0,0,8,0">
-                                    <TextBlock Text="Phase 1 · v1.0" FontSize="10" FontWeight="Bold" Foreground="#93C5FD"/>
+                                <Border Grid.Column="0" Background="#2A2314" CornerRadius="4" Padding="6,2" Margin="0,0,8,0">
+                                    <TextBlock Text="Phase 1 · v1.0" FontSize="10" FontWeight="Bold" Foreground="#FFC95C"/>
                                 </Border>
                                 <TextBlock Grid.Column="1" Text="WPF Modern Dark UI Shell &amp; Sidebar Navigation" FontWeight="SemiBold" Foreground="{StaticResource TextPrimary}" FontSize="13" VerticalAlignment="Center"/>
                                 <Border Grid.Column="2" Background="{StaticResource StatusGreenBg}" BorderBrush="{StaticResource StatusGreenBorder}" BorderThickness="1" CornerRadius="4" Padding="6,2">
@@ -47,8 +47,8 @@
                                 </Border>
                             </Grid>
 
-                            <Border Background="#050914" BorderBrush="#16233E" BorderThickness="1" CornerRadius="6" Padding="12,10" Margin="0,0,0,8">
-                                <TextBlock TextWrapping="Wrap" FontFamily="Consolas" FontSize="11.5" Foreground="#CBD5E1" LineHeight="17">
+                            <Border Background="#0E0D0B" BorderBrush="#2E2A23" BorderThickness="1" CornerRadius="6" Padding="12,10" Margin="0,0,0,8">
+                                <TextBlock TextWrapping="Wrap" FontFamily="Consolas" FontSize="11.5" Foreground="#DDD5C7" LineHeight="17">
                                     <Run Foreground="{StaticResource AccentCyanBrush}" Text="Prompt: "/><Run Text="&quot;Let's build a clean, modern WPF desktop app for our FuelQ simulator using .NET 10. I want a dark theme with a deep navy background, sleek card panels, and clean blue/cyan accents with zero third-party UI packages. Set up a main window with a left sidebar containing our logo, project title, and navigation buttons for: Home &amp; Team, Queue Calculator, DES Simulator, Empirical Data, Model Comparison, and AI Prompts. Use a ContentControl in the main area to switch views smoothly.&quot;"/>
                                 </TextBlock>
                             </Border>
@@ -65,8 +65,8 @@
                                     <ColumnDefinition Width="*"/>
                                     <ColumnDefinition Width="Auto"/>
                                 </Grid.ColumnDefinitions>
-                                <Border Grid.Column="0" Background="#1E3A8A" CornerRadius="4" Padding="6,2" Margin="0,0,8,0">
-                                    <TextBlock Text="Phase 2 · v1.5" FontSize="10" FontWeight="Bold" Foreground="#93C5FD"/>
+                                <Border Grid.Column="0" Background="#2A2314" CornerRadius="4" Padding="6,2" Margin="0,0,8,0">
+                                    <TextBlock Text="Phase 2 · v1.5" FontSize="10" FontWeight="Bold" Foreground="#FFC95C"/>
                                 </Border>
                                 <TextBlock Grid.Column="1" Text="Analytical Queue Models (M/M/1, M/M/s, M/G/1, M/D/1)" FontWeight="SemiBold" Foreground="{StaticResource TextPrimary}" FontSize="13" VerticalAlignment="Center"/>
                                 <Border Grid.Column="2" Background="{StaticResource StatusGreenBg}" BorderBrush="{StaticResource StatusGreenBorder}" BorderThickness="1" CornerRadius="4" Padding="6,2">
@@ -74,8 +74,8 @@
                                 </Border>
                             </Grid>
 
-                            <Border Background="#050914" BorderBrush="#16233E" BorderThickness="1" CornerRadius="6" Padding="12,10" Margin="0,0,0,8">
-                                <TextBlock TextWrapping="Wrap" FontFamily="Consolas" FontSize="11.5" Foreground="#CBD5E1" LineHeight="17">
+                            <Border Background="#0E0D0B" BorderBrush="#2E2A23" BorderThickness="1" CornerRadius="6" Padding="12,10" Margin="0,0,0,8">
+                                <TextBlock TextWrapping="Wrap" FontFamily="Consolas" FontSize="11.5" Foreground="#DDD5C7" LineHeight="17">
                                     <Run Foreground="{StaticResource AccentCyanBrush}" Text="Prompt: "/><Run Text="&quot;Now build the Queue Calculator view. Based on our class syllabus, implement exact formulas for M/M/1, M/M/s (multi-server Erlang-C), M/G/1, M/D/1, M/Ek/1, plus approximations for G/G/1 and G/G/s. Let users input arrival and service rates (or mean times). Compute Lq, L, Wq, W, utilization (ρ), and state probabilities P(n) for 0 to 10 customers. Add a clear warning badge if the queue is unstable (ρ ≥ 1.0).&quot;"/>
                                 </TextBlock>
                             </Border>
@@ -92,8 +92,8 @@
                                     <ColumnDefinition Width="*"/>
                                     <ColumnDefinition Width="Auto"/>
                                 </Grid.ColumnDefinitions>
-                                <Border Grid.Column="0" Background="#1E3A8A" CornerRadius="4" Padding="6,2" Margin="0,0,8,0">
-                                    <TextBlock Text="Phase 3 · v2.0" FontSize="10" FontWeight="Bold" Foreground="#93C5FD"/>
+                                <Border Grid.Column="0" Background="#2A2314" CornerRadius="4" Padding="6,2" Margin="0,0,8,0">
+                                    <TextBlock Text="Phase 3 · v2.0" FontSize="10" FontWeight="Bold" Foreground="#FFC95C"/>
                                 </Border>
                                 <TextBlock Grid.Column="1" Text="Discrete-Event Simulation (DES) Engine &amp; Visual Charts" FontWeight="SemiBold" Foreground="{StaticResource TextPrimary}" FontSize="13" VerticalAlignment="Center"/>
                                 <Border Grid.Column="2" Background="{StaticResource StatusGreenBg}" BorderBrush="{StaticResource StatusGreenBorder}" BorderThickness="1" CornerRadius="4" Padding="6,2">
@@ -101,12 +101,12 @@
                                 </Border>
                             </Grid>
 
-                            <Border Background="#050914" BorderBrush="#16233E" BorderThickness="1" CornerRadius="6" Padding="12,10" Margin="0,0,0,8">
-                                <TextBlock TextWrapping="Wrap" FontFamily="Consolas" FontSize="11.5" Foreground="#CBD5E1" LineHeight="17">
+                            <Border Background="#0E0D0B" BorderBrush="#2E2A23" BorderThickness="1" CornerRadius="6" Padding="12,10" Margin="0,0,0,8">
+                                <TextBlock TextWrapping="Wrap" FontFamily="Consolas" FontSize="11.5" Foreground="#DDD5C7" LineHeight="17">
                                     <Run Foreground="{StaticResource AccentCyanBrush}" Text="Prompt: "/><Run Text="&quot;Create the DES Simulator module. We need an event-driven simulation engine with a priority queue for vehicle arrivals, pump assignment, and departures. Let users configure number of pumps, vehicle limit, and probability distributions (Exponential, Normal, Uniform, Gamma). Show real-time KPI cards (Wq, W, Lq, L, utilization) and draw two custom vector charts: a queue timeline Q(t) and a waiting time histogram using native WPF DrawingContext.&quot;"/>
                                 </TextBlock>
                             </Border>
-                            <TextBlock Text="Result: DiscreteEventSimulator.cs, distribution samplers, and custom SimpleWpfChart vector graphics." FontSize="11" Foreground="{StaticResource TextSecondary}"/>
+                            <TextBlock Text="Result: GeneralDESimulator.cs (simulation table), ForecourtSimulator.cs (event-list DES), distribution samplers, and custom SimpleWpfChart vector graphics." FontSize="11" Foreground="{StaticResource TextSecondary}"/>
                         </StackPanel>
                     </Border>
 
@@ -119,21 +119,21 @@
                                     <ColumnDefinition Width="*"/>
                                     <ColumnDefinition Width="Auto"/>
                                 </Grid.ColumnDefinitions>
-                                <Border Grid.Column="0" Background="#1E3A8A" CornerRadius="4" Padding="6,2" Margin="0,0,8,0">
-                                    <TextBlock Text="Phase 4 · v2.5" FontSize="10" FontWeight="Bold" Foreground="#93C5FD"/>
+                                <Border Grid.Column="0" Background="#2A2314" CornerRadius="4" Padding="6,2" Margin="0,0,8,0">
+                                    <TextBlock Text="Phase 4 · v2.5" FontSize="10" FontWeight="Bold" Foreground="#FFC95C"/>
                                 </Border>
-                                <TextBlock Grid.Column="1" Text="Shell Maskan Field Observations &amp; Chi-Square Test" FontWeight="SemiBold" Foreground="{StaticResource TextPrimary}" FontSize="13" VerticalAlignment="Center"/>
+                                <TextBlock Grid.Column="1" Text="Observation Dataset &amp; Chi-Square Test" FontWeight="SemiBold" Foreground="{StaticResource TextPrimary}" FontSize="13" VerticalAlignment="Center"/>
                                 <Border Grid.Column="2" Background="{StaticResource StatusGreenBg}" BorderBrush="{StaticResource StatusGreenBorder}" BorderThickness="1" CornerRadius="4" Padding="6,2">
                                     <TextBlock Text="Data &amp; Hypothesis Test" FontSize="9.5" Foreground="{StaticResource StatusGreenText}" FontWeight="Bold"/>
                                 </Border>
                             </Grid>
 
-                            <Border Background="#050914" BorderBrush="#16233E" BorderThickness="1" CornerRadius="6" Padding="12,10" Margin="0,0,0,8">
-                                <TextBlock TextWrapping="Wrap" FontFamily="Consolas" FontSize="11.5" Foreground="#CBD5E1" LineHeight="17">
+                            <Border Background="#0E0D0B" BorderBrush="#2E2A23" BorderThickness="1" CornerRadius="6" Padding="12,10" Margin="0,0,0,8">
+                                <TextBlock TextWrapping="Wrap" FontFamily="Consolas" FontSize="11.5" Foreground="#DDD5C7" LineHeight="17">
                                     <Run Foreground="{StaticResource AccentCyanBrush}" Text="Prompt: "/><Run Text="&quot;Add the Empirical Data module for our Shell Maskan observation data (320 vehicle records). Implement Tukey's IQR method to detect and flag outlier service times. Then, add a Pearson Chi-Square Goodness-of-Fit test at α = 0.05 with 10 bins to prove whether our observed arrival intervals statistically fit an Exponential distribution. Also calibrate the forecourt mix to 70% bikes and 30% cars with cash vs card payment delays.&quot;"/>
                                 </TextBlock>
                             </Border>
-                            <TextBlock Text="Result: EmpiricalDataView, ChiSquareGoodnessOfFit.cs, IQR outlier detector, and site calibration parameters." FontSize="11" Foreground="{StaticResource TextSecondary}"/>
+                            <TextBlock Text="Result: EmpiricalDataView, ChiSquareGoodnessOfFit.cs, IQR outlier detector, and a 320-row synthetic baseline generator (no field CSV is included in the project)." FontSize="11" Foreground="{StaticResource TextSecondary}"/>
                         </StackPanel>
                     </Border>
 
@@ -146,8 +146,8 @@
                                     <ColumnDefinition Width="*"/>
                                     <ColumnDefinition Width="Auto"/>
                                 </Grid.ColumnDefinitions>
-                                <Border Grid.Column="0" Background="#1E3A8A" CornerRadius="4" Padding="6,2" Margin="0,0,8,0">
-                                    <TextBlock Text="Phase 5 · v3.0" FontSize="10" FontWeight="Bold" Foreground="#93C5FD"/>
+                                <Border Grid.Column="0" Background="#2A2314" CornerRadius="4" Padding="6,2" Margin="0,0,8,0">
+                                    <TextBlock Text="Phase 5 · v3.0" FontSize="10" FontWeight="Bold" Foreground="#FFC95C"/>
                                 </Border>
                                 <TextBlock Grid.Column="1" Text="Model Comparison, Sensitivity Curves &amp; LaTeX Export" FontWeight="SemiBold" Foreground="{StaticResource TextPrimary}" FontSize="13" VerticalAlignment="Center"/>
                                 <Border Grid.Column="2" Background="{StaticResource StatusGreenBg}" BorderBrush="{StaticResource StatusGreenBorder}" BorderThickness="1" CornerRadius="4" Padding="6,2">
@@ -155,8 +155,8 @@
                                 </Border>
                             </Grid>
 
-                            <Border Background="#050914" BorderBrush="#16233E" BorderThickness="1" CornerRadius="6" Padding="12,10" Margin="0,0,0,8">
-                                <TextBlock TextWrapping="Wrap" FontFamily="Consolas" FontSize="11.5" Foreground="#CBD5E1" LineHeight="17">
+                            <Border Background="#0E0D0B" BorderBrush="#2E2A23" BorderThickness="1" CornerRadius="6" Padding="12,10" Margin="0,0,0,8">
+                                <TextBlock TextWrapping="Wrap" FontFamily="Consolas" FontSize="11.5" Foreground="#DDD5C7" LineHeight="17">
                                     <Run Foreground="{StaticResource AccentCyanBrush}" Text="Prompt: "/><Run Text="&quot;Create a Model Comparison view that compares analytical models (M/M/1, M/D/1, M/G/1, M/M/c) against DES simulation results side-by-side with percentage differences. Add a sensitivity curve chart showing how queue length (Lq) changes as utilization (ρ) increases towards 1.0, and include a button to copy the table as clean LaTeX code for our project report.&quot;"/>
                                 </TextBlock>
                             </Border>
@@ -186,12 +186,12 @@
                                    Style="{StaticResource CardTitle}"/>
                         <Border Background="{StaticResource StatusGreenBg}" BorderBrush="{StaticResource StatusGreenBorder}"
                                 BorderThickness="1" CornerRadius="4" Padding="6,2" Margin="10,0,0,0" VerticalAlignment="Center">
-                            <TextBlock Text="✓ Verified via χ² Test" FontSize="9" Foreground="{StaticResource StatusGreenText}" FontWeight="Bold"/>
+                            <TextBlock Text="Method demo (synthetic data)" FontSize="9" Foreground="{StaticResource StatusGreenText}" FontWeight="Bold"/>
                         </Border>
                     </StackPanel>
                     <TextBlock TextWrapping="Wrap" FontSize="12" Foreground="{StaticResource TextSecondary}" LineHeight="18">
-                        <Run Text="H₀: Vehicle inter-arrivals at Shell Maskan Chowrangi follow an Exponential distribution with λ ≈ 2.8 vehicles/minute during peak hours (17:00–21:00 PKT).&#10;&#10;"/>
-                        <Run Text="Validation: Pearson Chi-Square Goodness-of-Fit applied to 320 empirical field observations across 10 equal-probability bins (df = 8, α = 0.05). Observed χ² = 9.14 &lt; Critical = 15.507 (p = 0.329). H₀ accepted. Exponential inter-arrival assumption is statistically justified at the 95% confidence level."/>
+                        <Run Text="H₀: Vehicle inter-arrival times follow an Exponential distribution (Poisson arrivals). The models assume λ ≈ 2.8 vehicles/minute at peak.&#10;&#10;"/>
+                        <Run Text="Demonstration: Pearson Chi-Square Goodness-of-Fit on the 320-record synthetic baseline dataset (generated from Exp(λ = 2.8/min), seed 2026), 10 equal-probability bins (df = 8, α = 0.05). Computed χ² = 14.69 &lt; critical 15.507 (p = 0.066), so H₀ is not rejected, but only narrowly. Because this data was generated as exponential, the test demonstrates the method; it does not validate the real site. Load real observations with Browse CSV on the Empirical Data page to test the site itself."/>
                     </TextBlock>
                 </StackPanel>
             </Border>
@@ -210,12 +210,12 @@
                                    Style="{StaticResource CardTitle}"/>
                         <Border Background="{StaticResource StatusGreenBg}" BorderBrush="{StaticResource StatusGreenBorder}"
                                 BorderThickness="1" CornerRadius="4" Padding="6,2" Margin="10,0,0,0" VerticalAlignment="Center">
-                            <TextBlock Text="✓ Field-Calibrated" FontSize="9" Foreground="{StaticResource StatusGreenText}" FontWeight="Bold"/>
+                            <TextBlock Text="Model parameter" FontSize="9" Foreground="{StaticResource StatusGreenText}" FontWeight="Bold"/>
                         </Border>
                     </StackPanel>
                     <TextBlock TextWrapping="Wrap" FontSize="12" Foreground="{StaticResource TextSecondary}" LineHeight="18">
-                        <Run Text="The Shell Maskan Chowrangi site exhibits a strong motorbike-dominant traffic regime consistent with Karachi's urban mobility patterns. Field-classified counts across 4 field observation sessions confirm 70% ± 3.2% motorbike fraction (95% CI: 66.8%–73.2%).&#10;&#10;"/>
-                        <Run Text="Impact: Motorbikes (μ_bike = 1/35 s⁻¹) service 62% faster than passenger cars (μ_car = 1/85 s⁻¹). This heterogeneous mix lowers effective utilization compared to a homogeneous-car model by approximately 18%, justifying M/M/c as the primary queuing framework."/>
+                        <Run Text="Traffic at Shell Maskan Chowrangi is motorbike-dominant, so the simulator assumes 70% motorbikes and 30% cars. This is a model parameter, not a measured value: no field counts are stored in the project.&#10;&#10;"/>
+                        <Run Text="Impact: with mean service times of 35 s for a motorbike and 85 s for a car, a motorbike is served 58.8% faster than a car ((85 − 35) / 85). The 70/30 mix gives an average service time of 0.7 × 35 + 0.3 × 85 = 50 s, which lowers utilization by about 41% compared with an all-car fleet (1 − 50 / 85)."/>
                     </TextBlock>
                 </StackPanel>
             </Border>
@@ -232,14 +232,14 @@
                         </Border>
                         <TextBlock Text="Assumption: Exponential Service Time (Memoryless)"
                                    Style="{StaticResource CardTitle}"/>
-                        <Border Background="#0D1B38" BorderBrush="{StaticResource AccentBlueBrush}"
+                        <Border Background="#211C12" BorderBrush="{StaticResource AccentBlueBrush}"
                                 BorderThickness="1" CornerRadius="4" Padding="6,2" Margin="10,0,0,0" VerticalAlignment="Center">
                             <TextBlock Text="⚠ Approximation" FontSize="9" Foreground="{StaticResource AccentCyanBrush}" FontWeight="Bold"/>
                         </Border>
                     </StackPanel>
                     <TextBlock TextWrapping="Wrap" FontSize="12" Foreground="{StaticResource TextSecondary}" LineHeight="18">
-                        <Run Text="Service duration at Shell Maskan is a function of fuel amount, vehicle type, payment method (4B-Cash vs 4A-POS), and attendant latency. Empirical data suggests a truncated lognormal distribution for service times.&#10;&#10;"/>
-                        <Run Text="Model Sensitivity: M/M/1 and M/M/c assume exponential (memoryless) service. The M/G/1 (Pollaczek-Khinchine) and M/Ek/1 models address this limitation. Across the realistic σ range (10–25s), M/G/1 Lq deviates from M/M/1 by 12–28%, within acceptable bounds. This limitation is explicitly communicated in the Model Comparison module."/>
+                        <Run Text="Service duration at Shell Maskan depends on fuel amount, vehicle type, payment method (4B-Cash vs 4A-POS) and attendant speed, so an exponential (memoryless) service time is an approximation.&#10;&#10;"/>
+                        <Run Text="Model Sensitivity: M/M/1 and M/M/c assume exponential service. The M/G/1 (Pollaczek-Khinchine), M/D/1 and M/Ek/1 models on the Model Comparison page show how the queue changes when service is less variable than exponential; for the same λ and μ, lower service variance always gives a shorter queue."/>
                     </TextBlock>
                 </StackPanel>
             </Border>
@@ -256,14 +256,14 @@
                         </Border>
                         <TextBlock Text="Assumption: FCFS Queuing + Infinite Queue Capacity"
                                    Style="{StaticResource CardTitle}"/>
-                        <Border Background="#1E0A0A" BorderBrush="{StaticResource StatusRedBorder}"
+                        <Border Background="#2B1412" BorderBrush="{StaticResource StatusRedBorder}"
                                 BorderThickness="1" CornerRadius="4" Padding="6,2" Margin="10,0,0,0" VerticalAlignment="Center">
                             <TextBlock Text="Known Limitation" FontSize="9" Foreground="{StaticResource StatusRedText}" FontWeight="Bold"/>
                         </Border>
                     </StackPanel>
                     <TextBlock TextWrapping="Wrap" FontSize="12" Foreground="{StaticResource TextSecondary}" LineHeight="18">
                         <Run Text="All M/M/c, M/G/1, and DES models assume First-Come-First-Served discipline and infinite queue capacity.&#10;&#10;"/>
-                        <Run Text="Field Reality: The physical forecourt has ≈ 12–18 vehicle slots before road spillback. At ρ > 0.88, physical queue overflow occurs (P(Q &gt; 5) = 14.2% under 3-server M/M/c at λ = 2.8 veh/min). This constraint is observable in the DES Simulation's Q(t) timeline."/>
+                        <Run Text="Reality: the physical forecourt has limited space before vehicles spill onto the road, and drivers who see a long queue may leave. The models do not capture this, so very long queues predicted at high utilization would not fully occur in practice. The DES Q(t) chart shows how often long queues build up."/>
                     </TextBlock>
                 </StackPanel>
             </Border>
@@ -286,8 +286,8 @@
                         </Border>
                     </StackPanel>
                     <TextBlock TextWrapping="Wrap" FontSize="12" Foreground="{StaticResource TextSecondary}" LineHeight="18">
-                        <Run Text="Branch 4B (Cash, Motorbike-dominant): Fast-exit cash payment handled by attendant, median clearance 13.2s post-dispensing. No receipt required.&#10;&#10;"/>
-                        <Run Text="Branch 4A-5 (POS/QR/Card): Electronic payment with POS terminal, PIN entry, receipt printing, and physical handover. Adds 20–45s to service completion. Approximately 18% of vehicles at Shell Maskan use this path, concentrated among passenger cars. DES correctly injects Branch 4A-5 overhead as a random addend (+Uniform[10,25]s) on eligible entities, reproducing observed service time inflation."/>
+                        <Run Text="Branch 4B (Cash): all cash payers, motorbikes and cars. Fast-exit cash payment handled by the attendant; no receipt required.&#10;&#10;"/>
+                        <Run Text="Branch 4A-5 (Card/QR): electronic payment with POS terminal, PIN entry, receipt printing and handover. The DES adds a random Uniform[10, 25] s overhead to these vehicles. In the model, all motorbikes pay cash and half of the cars pay by card or QR, so 0.3 × 0.5 = 15% of vehicles use this path, all of them cars."/>
                     </TextBlock>
                 </StackPanel>
             </Border>
@@ -306,9 +306,9 @@
                         <StackPanel Margin="0,0,8,0">
                             <TextBlock Text="☑ Pearson χ² Goodness of Fit"
                                        FontSize="11.5" Foreground="{StaticResource StatusGreenText}"/>
-                            <TextBlock Text="☑ IQR Outlier Detection"
+                            <TextBlock Text="☑ IQR Outliers (service times)"
                                        FontSize="11.5" Foreground="{StaticResource StatusGreenText}"/>
-                            <TextBlock Text="☑ Little's Theorem Verified (L = λ·W)"
+                            <TextBlock Text="☑ Little's Law checked (time-avg L vs λ·W)"
                                        FontSize="11.5" Foreground="{StaticResource StatusGreenText}"/>
                         </StackPanel>
                         <StackPanel Margin="4,0,4,0">
@@ -316,13 +316,13 @@
                                        FontSize="11.5" Foreground="{StaticResource StatusGreenText}"/>
                             <TextBlock Text="☑ Pollaczek-Khinchine (M/G/1)"
                                        FontSize="11.5" Foreground="{StaticResource StatusGreenText}"/>
-                            <TextBlock Text="☑ Box-Muller Normal Sampling"
+                            <TextBlock Text="☑ Inverse-Transform Sampling"
                                        FontSize="11.5" Foreground="{StaticResource StatusGreenText}"/>
                         </StackPanel>
                         <StackPanel Margin="8,0,0,0">
-                            <TextBlock Text="☑ DES Priority Queue Dispatch"
+                            <TextBlock Text="☑ Event-List DES (Forecourt)"
                                        FontSize="11.5" Foreground="{StaticResource StatusGreenText}"/>
-                            <TextBlock Text="☑ 70/30 Fleet Mix Validated"
+                            <TextBlock Text="☑ 70/30 Fleet Mix (parameter)"
                                        FontSize="11.5" Foreground="{StaticResource StatusGreenText}"/>
                             <TextBlock Text="☑ Shortest-Queue Heuristic"
                                        FontSize="11.5" Foreground="{StaticResource StatusGreenText}"/>

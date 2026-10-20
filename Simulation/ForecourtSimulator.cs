@@ -6,6 +6,10 @@ using FuelQ.Distributions;
 namespace FuelQ.Simulation;
 
 /// <summary>Result returned by ForecourtSimulator.Run()</summary>
+/// <remarks>
+/// Averages cover vehicles whose service finished within the run; vehicles still
+/// waiting or fueling at the end are excluded, so waits are slightly understated.
+/// </remarks>
 public record SimulationResult(
     List<SimulationLogRecord>          Logs,
     List<(double Time, int QLen)>      QueueTimeline,
@@ -13,10 +17,11 @@ public record SimulationResult(
     double AverageSystemTime,
     int    MaxQueueLength,
     int    VehiclesProcessed,
-    double[] ServerUtilization);
+    double[] ServerUtilization,
+    double AverageQueueLength);   // time-weighted mean of Q(t) over the run
 
 /// <summary>
-/// High-performance priority-queue discrete-event simulation engine.
+/// Event-list discrete-event simulation engine (events kept in a sorted set).
 /// Models the Shell Maskan Chowrangi forecourt with parallel pumps,
 /// 70/30 bike-car mix, Branch 4B (Cash) vs Branch 4A-5 (POS/receipt).
 /// </summary>
@@ -50,6 +55,7 @@ public static class ForecourtSimulator
         var logs          = new List<SimulationLogRecord>();
         var qTimeline     = new List<(double Time, int QLen)>();
         var vehicles      = new List<VehicleEntity>();
+        var vehiclesById  = new Dictionary<int, VehicleEntity>();
 
         var events = new SortedSet<SimEvent>(Comparer<SimEvent>.Create((a, b) =>
         {
@@ -86,7 +92,8 @@ public static class ForecourtSimulator
                 if (isBike)       payment = "Cash";
                 else { double r = rng.NextDouble(); payment = r < 0.50 ? "Cash" : r < 0.78 ? "Card_POS" : "QR_Pay"; }
 
-                string branch = (payment == "Cash" && isBike) ? "4B-Cash" : "4A-POS";
+                // All cash payers (bikes and cars) use the fast 4B lane; card/QR payers use 4A-POS
+                string branch = payment == "Cash" ? "4B-Cash" : "4A-POS";
 
                 double svcDuration = isBike ? bikeDist.Sample(rng) : carDist.Sample(rng);
                 // Branch 4A-5 adds handover + receipt time
@@ -118,13 +125,14 @@ public static class ForecourtSimulator
                 logs.Add(MakeLog(clock, "Arrival", vehicle, -1, queueNow, branch, ""));
                 qTimeline.Add((clock, queueNow));
                 vehicles.Add(vehicle);
+                vehiclesById[vehicle.Id] = vehicle;
 
                 if (pumpFreeAt[bestPump] <= clock)
                 {
                     // Pump is free — serve immediately
                     double finish = clock + svcDuration;
                     pumpFreeAt[bestPump]  = finish;
-                    pumpBusySec[bestPump]+= svcDuration;
+                    pumpBusySec[bestPump]+= BusyWithinRun(clock, finish, cfg.SimDurationSeconds);
                     vehicle.AssignedPump  = bestPump + 1;
                     vehicle.ServiceStart  = clock;
                     vehicle.ServiceEnd    = finish;
@@ -135,9 +143,13 @@ public static class ForecourtSimulator
                 }
                 else
                 {
-                    // Queue at best pump
+                    // Queue at best pump. Estimated wait = rest of the current service
+                    // plus the service times of every vehicle already queued at this pump.
+                    int ahead = pumpQueues[bestPump].Count;
+                    double estWait = pumpFreeAt[bestPump] - clock + pumpQueues[bestPump].Sum(v => v.ServiceDuration);
                     pumpQueues[bestPump].Enqueue(vehicle);
-                    logs.Add(MakeLog(clock, "Queued", vehicle, bestPump + 1, queueNow, branch, $"Wait ≈ {pumpFreeAt[bestPump] - clock:F0}s"));
+                    logs.Add(MakeLog(clock, "Queued", vehicle, bestPump + 1, queueNow, branch,
+                        $"Wait ≈ {estWait:F0}s ({ahead} ahead)"));
                 }
 
                 // Schedule next arrival
@@ -149,7 +161,7 @@ public static class ForecourtSimulator
             {
                 int pump = ev.PumpId;
                 queueNow = Math.Max(0, queueNow);
-                logs.Add(MakeLog(clock, "ServiceEnd", FindVehicle(vehicles, ev.VehicleId), pump + 1, queueNow, "", "Departed"));
+                logs.Add(MakeLog(clock, "ServiceEnd", vehiclesById.GetValueOrDefault(ev.VehicleId), pump + 1, queueNow, "", "Departed"));
                 qTimeline.Add((clock, queueNow));
 
                 // Serve next in this pump's queue
@@ -158,7 +170,7 @@ public static class ForecourtSimulator
                     var next = pumpQueues[pump].Dequeue();
                     double finish = clock + next.ServiceDuration;
                     pumpFreeAt[pump]  = finish;
-                    pumpBusySec[pump]+= next.ServiceDuration;
+                    pumpBusySec[pump]+= BusyWithinRun(clock, finish, cfg.SimDurationSeconds);
                     next.AssignedPump  = pump + 1;
                     next.ServiceStart  = clock;
                     next.ServiceEnd    = finish;
@@ -185,8 +197,21 @@ public static class ForecourtSimulator
         for (int p = 0; p < cfg.NumServers; p++)
             utilization[p] = simDuration > 0 ? Math.Min(1.0, pumpBusySec[p] / simDuration) : 0;
 
-        return new SimulationResult(logs, qTimeline, avgWq, avgW, maxQ, served.Count, utilization);
+        // Time-weighted Lq: each queue length holds until the next timeline point (or the end of the run)
+        double area = 0;
+        for (int i = 0; i < qTimeline.Count; i++)
+        {
+            double tEnd = i + 1 < qTimeline.Count ? qTimeline[i + 1].Time : simDuration;
+            area += qTimeline[i].QLen * Math.Max(0, tEnd - qTimeline[i].Time);
+        }
+        double avgLq = simDuration > 0 ? area / simDuration : 0;
+
+        return new SimulationResult(logs, qTimeline, avgWq, avgW, maxQ, served.Count, utilization, avgLq);
     }
+
+    /// <summary>Busy time of a service in [start, finish], clipped to the end of the run.</summary>
+    private static double BusyWithinRun(double start, double finish, double runEnd) =>
+        Math.Max(0, Math.Min(finish, runEnd) - start);
 
     private static SimulationLogRecord MakeLog(double clock, string evType,
         VehicleEntity? v, int pump, int qlen, string path, string notes)
@@ -203,7 +228,4 @@ public static class ForecourtSimulator
             Notes       = notes
         };
     }
-
-    private static VehicleEntity? FindVehicle(List<VehicleEntity> list, int id) =>
-        list.Find(v => v.Id == id);
 }

@@ -20,13 +20,19 @@ public record QueueMetrics(
     double Ca = 1.0,
     double Cs = 1.0,
     string ModelName = "M/M/1",
-    string FormulaUsed = "")
+    string FormulaUsed = "",
+    bool HasExactStateProbabilities = false)
 {
     public static readonly QueueMetrics Empty = new(0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0);
 
-    /// <summary>State probability P(n customers in system) for M/M/1 or M/M/s.</summary>
+    /// <summary>
+    /// State probability P(n customers in system). Exact only for M/M/1 and M/M/s
+    /// (check <see cref="HasExactStateProbabilities"/>); returns NaN for other models,
+    /// whose state distribution is not geometric.
+    /// </summary>
     public double Pn(int n)
     {
+        if (!HasExactStateProbabilities) return double.NaN;
         if (n < 0 || Rho >= 1.0) return 0;
         if (S == 1)
         {
@@ -40,7 +46,8 @@ public record QueueMetrics(
             if (n < S)
                 return P0 * Math.Pow(a, n) / Factorial(n);
             else
-                return P0 * Math.Pow(a, n) / (Factorial(S) * Math.Pow(S, n - S));
+                // P0·aⁿ/(s!·sⁿ⁻ˢ) rewritten as P0·(aˢ/s!)·ρⁿ⁻ˢ so large n cannot overflow
+                return P0 * Math.Pow(a, S) / Factorial(S) * Math.Pow(Rho, n - S);
         }
     }
 

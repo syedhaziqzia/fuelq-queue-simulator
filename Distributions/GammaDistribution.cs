@@ -82,6 +82,26 @@ public sealed class GammaDistribution : IDistribution
         return LowerIncompleteGammaRatio(_shape, x / _scale);
     }
 
+    /// <summary>
+    /// Inverse-transform sample for a given uniform draw u ∈ (0, 1), found by
+    /// bisection on the CDF. Slower than Marsaglia–Tsang, but it lets the
+    /// simulation table show the exact random number behind each value.
+    /// </summary>
+    public double Quantile(double u)
+    {
+        if (u <= 0.0 || u >= 1.0)
+            throw new ArgumentOutOfRangeException(nameof(u), "u must be in (0, 1).");
+
+        double lo = 0.0, hi = Mean + 10.0 * Math.Sqrt(Variance);
+        while (CDF(hi) < u) hi *= 2.0;
+        for (int i = 0; i < 100 && hi - lo > 1e-12 * hi; i++)
+        {
+            double mid = 0.5 * (lo + hi);
+            if (CDF(mid) < u) lo = mid; else hi = mid;
+        }
+        return 0.5 * (lo + hi);
+    }
+
     public static double LogGamma(double x)
     {
         // Lanczos approximation
@@ -95,7 +115,8 @@ public sealed class GammaDistribution : IDistribution
         return -tmp + Math.Log(2.5066282746310005 * ser / x);
     }
 
-    private static double LowerIncompleteGammaRatio(double a, double x)
+    /// <summary>Regularized lower incomplete gamma function P(a, x).</summary>
+    public static double LowerIncompleteGammaRatio(double a, double x)
     {
         if (x <= 0) return 0;
         if (x < a + 1.0)

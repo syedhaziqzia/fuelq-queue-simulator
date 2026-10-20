@@ -24,7 +24,7 @@ public partial class MetricCard : UserControl
 
     public static readonly DependencyProperty AccentColorProperty =
         DependencyProperty.Register(nameof(AccentColor), typeof(Brush), typeof(MetricCard),
-        new PropertyMetadata(new SolidColorBrush(Color.FromRgb(0x38, 0xBD, 0xF8))));
+        new PropertyMetadata(new SolidColorBrush(Color.FromRgb(0xFF, 0xB0, 0x20))));
 
     public string Symbol      { get => (string)GetValue(SymbolProperty);      set => SetValue(SymbolProperty, value); }
     public string MetricValue { get => (string)GetValue(MetricValueProperty); set => SetValue(MetricValueProperty, value); }

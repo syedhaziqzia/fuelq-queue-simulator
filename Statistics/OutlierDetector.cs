@@ -4,13 +4,15 @@ using System.Linq;
 
 namespace FuelQ.Statistics;
 
-/// <summary>IQR-based outlier detection for empirical forecourt records.</summary>
+/// <summary>IQR-based outlier detection for forecourt observation records.</summary>
 public static class OutlierDetector
 {
     /// <summary>
-    /// Flags records whose ServiceDuration or InterArrivalTime lie outside
-    /// [Q1 − 1.5·IQR, Q3 + 1.5·IQR]. Modifies records in-place and returns
-    /// the count of outliers flagged.
+    /// Flags records whose ServiceDuration lies outside [Q1 − 1.5·IQR, Q3 + 1.5·IQR].
+    /// Modifies records in-place and returns the count of outliers flagged.
+    /// Inter-arrival times are deliberately not screened: Tukey's fences assume
+    /// roughly symmetric data, and on right-skewed exponential data they flag
+    /// about 5% of perfectly valid observations.
     /// </summary>
     public static int Detect(IList<ForecourtObservationRecord> records)
     {
@@ -23,15 +25,10 @@ public static class OutlierDetector
         double[] svc = [.. records.Select(r => r.ServiceDuration).OrderBy(x => x)];
         (double svcLow, double svcHigh) = Fences(svc);
 
-        // Compute IQR fences for InterArrivalTime
-        double[] iat = [.. records.Select(r => r.InterArrivalTime).OrderBy(x => x)];
-        (double iatLow, double iatHigh) = Fences(iat);
-
         int count = 0;
         foreach (var r in records)
         {
-            if (r.ServiceDuration < svcLow || r.ServiceDuration > svcHigh ||
-                r.InterArrivalTime < iatLow || r.InterArrivalTime > iatHigh)
+            if (r.ServiceDuration < svcLow || r.ServiceDuration > svcHigh)
             {
                 r.IsOutlier = true;
                 count++;

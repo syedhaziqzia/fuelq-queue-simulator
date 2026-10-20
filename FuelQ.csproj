@@ -25,6 +25,9 @@
 
     <!-- Deterministic build for reproducibility -->
     <Deterministic>true</Deterministic>
+
+    <!-- The verification suite in Tests/ is a separate project -->
+    <DefaultItemExcludes>$(DefaultItemExcludes);Tests\**</DefaultItemExcludes>
   </PropertyGroup>
 
   <ItemGroup>

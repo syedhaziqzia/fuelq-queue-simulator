@@ -39,7 +39,8 @@ public static class MM1Calculator
             Ca: 1.0,
             Cs: 1.0,
             ModelName: "M/M/1",
-            FormulaUsed: formula
+            FormulaUsed: formula,
+            HasExactStateProbabilities: true
         );
 
         return (metrics, null);

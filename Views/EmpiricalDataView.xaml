@@ -3,7 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:controls="clr-namespace:FuelQ.Controls"
              Background="{StaticResource CanvasBackground}"
-             FontFamily="Segoe UI">
+             FontFamily="{StaticResource BodyFont}">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
@@ -14,35 +14,42 @@
 
         <!-- ── TOOLBAR ── -->
         <Border Grid.Row="0"
-                Background="{StaticResource SidebarSurface}"
+                Background="{StaticResource CanvasBackground}"
                 BorderBrush="{StaticResource CardBorder}"
                 BorderThickness="0,0,0,1"
-                Padding="16,12">
-            <StackPanel Orientation="Horizontal">
-                <Button Style="{StaticResource SecondaryButton}"
-                        Content="⊕  Generate Baseline (320 rows)"
-                        Click="GenerateBaseline_Click" Margin="0,0,8,0"/>
-                <Button Style="{StaticResource SecondaryButton}"
-                        Content="📂  Browse / Load CSV..."
-                        Click="BrowseCsv_Click" Margin="0,0,8,0"/>
-                <Button Style="{StaticResource SecondaryButton}"
-                        Content="⚠  Detect Outliers (IQR)"
-                        Click="DetectOutliers_Click" Margin="0,0,8,0"/>
-                <Button Style="{StaticResource PrimaryButton}"
-                        Content="χ²  Run Chi-Square Test"
-                        Click="RunChiSquare_Click"/>
+                Padding="24,18,24,14">
+            <StackPanel>
+                <TextBlock Text="Empirical Data" Style="{StaticResource PageTitle}" Margin="0,0,0,4"/>
+                <TextBlock Text="Every formula assumes vehicles arrive at random. This page checks that assumption against arrival records."
+                           Foreground="{StaticResource TextSecondary}" FontSize="13" Margin="0,0,0,14"/>
+                <controls:StepGuide Margin="0,0,0,14"
+                                    Steps="Get data :: Generate the 320-row synthetic baseline, or load a real CSV from the site.|Flag odd service times :: The IQR rule marks fueling times that are far from the rest.|Run the χ² test :: Do the gaps between arrivals match an exponential (random) pattern?"/>
+                <WrapPanel>
+                    <Button Style="{StaticResource SecondaryButton}"
+                            Content="1 · Generate synthetic baseline"
+                            Click="GenerateBaseline_Click" Margin="0,0,8,6"/>
+                    <Button Style="{StaticResource SecondaryButton}"
+                            Content="1 · Load a CSV…"
+                            Click="BrowseCsv_Click" Margin="0,0,8,6"/>
+                    <Button Style="{StaticResource SecondaryButton}"
+                            Content="2 · Flag odd service times"
+                            Click="DetectOutliers_Click" Margin="0,0,8,6"/>
+                    <Button Style="{StaticResource PrimaryButton}"
+                            Content="3 · Run χ² test"
+                            Click="RunChiSquare_Click" Margin="0,0,0,6"/>
+                </WrapPanel>
             </StackPanel>
         </Border>
 
         <!-- ── STATUS BAR ── -->
         <Border Grid.Row="1"
-                Background="#050D1A"
+                Background="#0E0D0B"
                 BorderBrush="{StaticResource SidebarBorder}"
                 BorderThickness="0,0,0,1"
                 Padding="16,7">
             <StackPanel Orientation="Horizontal">
                 <TextBlock x:Name="StatusRecords"
-                           Text="No data loaded"
+                           Text="No data yet. Start with step 1 above: generate the synthetic baseline or load a CSV."
                            Foreground="{StaticResource TextSecondary}"
                            FontSize="11.5" VerticalAlignment="Center" Margin="0,0,16,0"/>
                 <TextBlock x:Name="StatusOutliers"
@@ -68,7 +75,7 @@
                 <DataGrid.RowStyle>
                     <Style TargetType="DataGridRow">
                         <Setter Property="Background" Value="{StaticResource RowBase}"/>
-                        <Setter Property="Foreground" Value="#B0C4DE"/>
+                        <Setter Property="Foreground" Value="#CFC6B6"/>
                         <Style.Triggers>
                             <Trigger Property="AlternationIndex" Value="1">
                                 <Setter Property="Background" Value="{StaticResource RowAlternate}"/>
@@ -78,7 +85,7 @@
                                 <Setter Property="Foreground" Value="{StaticResource StatusRedText}"/>
                             </DataTrigger>
                             <Trigger Property="IsSelected" Value="True">
-                                <Setter Property="Background" Value="#1A2D50"/>
+                                <Setter Property="Background" Value="#3A3020"/>
                             </Trigger>
                         </Style.Triggers>
                     </Style>
@@ -116,7 +123,7 @@
                     BorderThickness="0,0,1,0"
                     Padding="14,10">
                 <StackPanel>
-                    <TextBlock Text="Empirical Distributions Preview"
+                    <TextBlock Text="Observed Distributions Preview"
                                Style="{StaticResource CardTitle}" Margin="0,0,0,8"/>
                     <Grid>
                         <Grid.ColumnDefinitions>
@@ -147,7 +154,7 @@
                     <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
                         <TextBlock Text="χ²  Chi-Square Test Report"
                                    Style="{StaticResource CardTitle}"/>
-                        <Border Background="#070D1D" BorderBrush="{StaticResource CardBorder}"
+                        <Border Background="#131210" BorderBrush="{StaticResource CardBorder}"
                                 BorderThickness="1" CornerRadius="4" Padding="5,2" Margin="8,0,0,0">
                             <TextBlock Text="Pearson χ²" FontSize="9"
                                        Foreground="{StaticResource TextSecondary}"/>
@@ -166,7 +173,7 @@
                         <StackPanel Grid.Column="0" Margin="0,0,6,0">
                             <TextBlock Text="BINS (K)" FontSize="8.5" FontWeight="Bold"
                                        Foreground="{StaticResource TextSecondary}"/>
-                            <TextBlock x:Name="ChiBins" Text="—" FontSize="22" FontWeight="Bold"
+                            <TextBlock x:Name="ChiBins" Text="—" Style="{StaticResource MeterValue}"
                                        Foreground="{StaticResource AccentCyanBrush}"/>
                             <TextBlock Text="≥ 8 req. met" FontSize="9"
                                        Foreground="{StaticResource TextMuted}"/>
@@ -174,7 +181,7 @@
                         <StackPanel Grid.Column="1" Margin="3,0,3,0">
                             <TextBlock Text="DEG. FREEDOM (DF)" FontSize="8.5" FontWeight="Bold"
                                        Foreground="{StaticResource TextSecondary}"/>
-                            <TextBlock x:Name="ChiDf" Text="—" FontSize="22" FontWeight="Bold"
+                            <TextBlock x:Name="ChiDf" Text="—" Style="{StaticResource MeterValue}"
                                        Foreground="{StaticResource AccentCyanBrush}"/>
                             <TextBlock Text="k - 1 - p(=1)" FontSize="9"
                                        Foreground="{StaticResource TextMuted}"/>
@@ -182,7 +189,7 @@
                         <StackPanel Grid.Column="2" Margin="6,0,0,0">
                             <TextBlock Text="TEST STAT (χ²)" FontSize="8.5" FontWeight="Bold"
                                        Foreground="{StaticResource TextSecondary}"/>
-                            <TextBlock x:Name="ChiStat" Text="—" FontSize="22" FontWeight="Bold"
+                            <TextBlock x:Name="ChiStat" Text="—" Style="{StaticResource MeterValue}"
                                        Foreground="{StaticResource AccentCyanBrush}"/>
                             <TextBlock x:Name="ChiStatHint" Text="χ² &lt; Critical" FontSize="9"
                                        Foreground="{StaticResource TextMuted}"/>
@@ -197,16 +204,16 @@
                         <StackPanel Grid.Column="0">
                             <TextBlock Text="CRITICAL VALUE" FontSize="8.5" FontWeight="Bold"
                                        Foreground="{StaticResource TextSecondary}"/>
-                            <TextBlock x:Name="ChiCritical" Text="—" FontSize="18" FontWeight="Bold"
+                            <TextBlock x:Name="ChiCritical" Text="—" Style="{StaticResource MeterValue}"
                                        Foreground="{StaticResource TextPrimary}"/>
                             <TextBlock Text="α = 0.05" FontSize="9" Foreground="{StaticResource TextMuted}"/>
                         </StackPanel>
                         <StackPanel Grid.Column="1">
                             <TextBlock Text="P-VALUE" FontSize="8.5" FontWeight="Bold"
                                        Foreground="{StaticResource TextSecondary}"/>
-                            <TextBlock x:Name="ChiPValue" Text="—" FontSize="18" FontWeight="Bold"
+                            <TextBlock x:Name="ChiPValue" Text="—" Style="{StaticResource MeterValue}"
                                        Foreground="{StaticResource StatusGreenText}"/>
-                            <TextBlock Text="p &gt; 0.05" FontSize="9" Foreground="{StaticResource TextMuted}"/>
+                            <TextBlock Text="accept H₀ if p &gt; 0.05" FontSize="9" Foreground="{StaticResource TextMuted}"/>
                         </StackPanel>
                     </Grid>
                     <Border x:Name="ChiVerdictBorder"

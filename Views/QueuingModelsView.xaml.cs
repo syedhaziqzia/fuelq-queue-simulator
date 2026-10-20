@@ -19,15 +19,16 @@ public partial class QueuingModelsView : UserControl
 {
     private string _currentModel = "MM1";
     private bool _loaded;
+    private bool _syncingInputs; // true while code writes a derived value into an input box
 
     private static readonly Dictionary<string, string> ModelDescriptions = new()
     {
-        ["MM1"] = "🟢 M/M/1: Single server. Poisson arrivals + Exponential service (both fixed). Exact formula: Lq = ρ²/(1−ρ).",
-        ["MMS"] = "🟢 M/M/s: Multi-server (s parallel pumps). Poisson arrivals + Exponential service. Exact Erlang-C formulas for P₀ and Pw.",
-        ["MG1"] = "🟡 M/G/1: Single server. Poisson arrivals + General service distribution (Uniform / Normal). Exact Pollaczek-Khinchine formula.",
-        ["MGS"] = "🟣 M/G/s: Multi-server. Poisson arrivals + General service distribution. Allen-Cunneen approximation: Wq ≈ [(1 + Cs²)/2] × Wq(M/M/s).",
-        ["GG1"] = "🔵 G/G/1: Single server. General arrivals + General service. Kingman approximation: Wq ≈ [(Ca² + Cs²)/2] × [ρ/(1−ρ)] × E[S].",
-        ["GGS"] = "🔴 G/G/s: Multi-server. General arrivals + General service. Allen-Cunneen approximation: Wq ≈ [(Ca² + Cs²)/2] × Wq(M/M/s)."
+        ["MM1"] = "M/M/1 · Single server. Poisson arrivals + Exponential service (both fixed). Exact formula: Lq = ρ²/(1−ρ).",
+        ["MMS"] = "M/M/s · Multi-server (s parallel pumps). Poisson arrivals + Exponential service. Exact Erlang-C formulas for P₀ and Pw.",
+        ["MG1"] = "M/G/1 · Single server. Poisson arrivals + General service distribution (Uniform / Normal). Exact Pollaczek-Khinchine formula.",
+        ["MGS"] = "M/G/s · Multi-server. Poisson arrivals + General service distribution. Allen-Cunneen approximation: Wq ≈ [(1 + Cs²)/2] × Wq(M/M/s).",
+        ["GG1"] = "G/G/1 · Single server. General arrivals + General service. Kingman approximation: Wq ≈ [(Ca² + Cs²)/2] × [ρ/(1−ρ)] × E[S].",
+        ["GGS"] = "G/G/s · Multi-server. General arrivals + General service. Allen-Cunneen approximation: Wq ≈ [(Ca² + Cs²)/2] × Wq(M/M/s)."
     };
 
     public QueuingModelsView()
@@ -81,16 +82,12 @@ public partial class QueuingModelsView : UserControl
     private void ArrivalMode_Changed(object sender, RoutedEventArgs e)
     {
         if (!_loaded) return;
-        bool isMean = RbArrivalMean.IsChecked == true;
-        TxtArrivalHint.Text = isMean ? "λ = 1 ÷ this value (Mean headway between vehicle arrivals)" : "Used directly as arrival rate λ";
         Recalculate();
     }
 
     private void ServiceMode_Changed(object sender, RoutedEventArgs e)
     {
         if (!_loaded) return;
-        bool isMean = RbServiceMean.IsChecked == true;
-        TxtServiceHint.Text = isMean ? "μ = 1 ÷ this value (Mean duration to fuel one vehicle)" : "Used directly as service rate μ";
         Recalculate();
     }
 
@@ -155,8 +152,8 @@ public partial class QueuingModelsView : UserControl
         TbArrNormalVar.Text = "1";
 
         CbServiceDist.SelectedIndex = 0;
-        TbSvcUniformMin.Text = "1.5";
-        TbSvcUniformMax.Text = "4.5";
+        TbSvcUniformMin.Text = "1";
+        TbSvcUniformMax.Text = "3";
         TbSvcNormalStd.Text = "1";
         TbSvcNormalVar.Text = "1";
 
@@ -174,6 +171,8 @@ public partial class QueuingModelsView : UserControl
 
     private void Recalculate()
     {
+        if (_syncingInputs) return;
+
         string unit = (CbTimeUnit.SelectedItem as ComboBoxItem)?.Content?.ToString() switch
         {
             "Seconds" => "sec",
@@ -181,15 +180,65 @@ public partial class QueuingModelsView : UserControl
             _ => "min"
         };
 
-        // Parse Arrival
-        double arrVal = double.TryParse(TbArrivalVal.Text, out double av) ? av : 3.0;
-        if (arrVal <= 0) arrVal = 1.0;
-        double lambda = RbArrivalMean.IsChecked == true ? 1.0 / arrVal : arrVal;
+        // Distribution index per side: 0 = Exponential, 1 = Uniform, 2 = Normal (fixed models are always Exponential)
+        int arrDist = _currentModel is "GG1" or "GGS" ? CbArrivalDist.SelectedIndex : 0;
+        int svcDist = _currentModel is "MG1" or "MGS" or "GG1" or "GGS" ? CbServiceDist.SelectedIndex : 0;
+        string? inputError = null;
 
-        // Parse Service
-        double svcVal = double.TryParse(TbServiceVal.Text, out double sv) ? sv : 2.0;
-        if (svcVal <= 0) svcVal = 1.0;
-        double mu = RbServiceMean.IsChecked == true ? 1.0 / svcVal : svcVal;
+        // Arrival mean and variance. Uniform takes its mean from the [a, b] bounds,
+        // so the mean box becomes a read-only display of the derived value.
+        double lambda, arrVar;
+        if (arrDist == 1)
+        {
+            var (mean, var, err) = UniformMoments(TbArrUniformMin.Text, TbArrUniformMax.Text, 2.0, 4.0, "interarrival");
+            inputError ??= err;
+            lambda = 1.0 / mean;
+            arrVar = var;
+            ShowDerivedValue(TbArrivalVal, RbArrivalMean.IsChecked == true ? mean : lambda);
+        }
+        else
+        {
+            double arrVal = double.TryParse(TbArrivalVal.Text, out double av) ? av : 3.0;
+            if (arrVal <= 0) arrVal = 1.0;
+            lambda = RbArrivalMean.IsChecked == true ? 1.0 / arrVal : arrVal;
+            arrVar = 1.0 / (lambda * lambda);
+            if (arrDist == 2)
+            {
+                double std = double.TryParse(TbArrNormalStd.Text, out double ast) ? ast : 1.0;
+                if (std < 0) inputError ??= "Standard deviation σ must be ≥ 0.";
+                arrVar = std * std;
+                ShowDerivedValue(TbArrNormalVar, arrVar);
+            }
+        }
+
+        // Service mean and variance (same rules as arrivals)
+        double mu, svcVar;
+        if (svcDist == 1)
+        {
+            var (mean, var, err) = UniformMoments(TbSvcUniformMin.Text, TbSvcUniformMax.Text, 1.0, 3.0, "service");
+            inputError ??= err;
+            mu = 1.0 / mean;
+            svcVar = var;
+            ShowDerivedValue(TbServiceVal, RbServiceMean.IsChecked == true ? mean : mu);
+        }
+        else
+        {
+            double svcVal = double.TryParse(TbServiceVal.Text, out double sv) ? sv : 2.0;
+            if (svcVal <= 0) svcVal = 1.0;
+            mu = RbServiceMean.IsChecked == true ? 1.0 / svcVal : svcVal;
+            svcVar = 1.0 / (mu * mu);
+            if (svcDist == 2)
+            {
+                double std = double.TryParse(TbSvcNormalStd.Text, out double sst) ? sst : 1.0;
+                if (std < 0) inputError ??= "Standard deviation σ must be ≥ 0.";
+                svcVar = std * std;
+                ShowDerivedValue(TbSvcNormalVar, svcVar);
+            }
+        }
+
+        TbArrivalVal.IsReadOnly = arrDist == 1;
+        TbServiceVal.IsReadOnly = svcDist == 1;
+        UpdateHints(arrDist == 1, svcDist == 1);
 
         // Parse Servers
         int s = int.TryParse(TbNumServers.Text, out int svrs) ? Math.Max(1, svrs) : 1;
@@ -207,39 +256,6 @@ public partial class QueuingModelsView : UserControl
         TxtDerivedRho.Foreground = rho >= 1.0 ? (Brush)FindResource("StatusRedText")
                                  : rho > 0.85 ? (Brush)FindResource("AccentOrange")
                                  : (Brush)FindResource("StatusGreenText");
-
-        // Parse Variances
-        double arrVar = 1.0 / (lambda * lambda);
-        if (_currentModel is "GG1" or "GGS")
-        {
-            if (CbArrivalDist.SelectedIndex == 1) // Uniform
-            {
-                double uMin = double.TryParse(TbArrUniformMin.Text, out double amin) ? amin : 2.0;
-                double uMax = double.TryParse(TbArrUniformMax.Text, out double amax) ? amax : 4.0;
-                arrVar = Math.Pow(uMax - uMin, 2) / 12.0;
-            }
-            else if (CbArrivalDist.SelectedIndex == 2) // Normal
-            {
-                double std = double.TryParse(TbArrNormalStd.Text, out double ast) ? ast : 1.0;
-                arrVar = std * std;
-            }
-        }
-
-        double svcVar = 1.0 / (mu * mu);
-        if (_currentModel is "MG1" or "MGS" or "GG1" or "GGS")
-        {
-            if (CbServiceDist.SelectedIndex == 1) // Uniform
-            {
-                double uMin = double.TryParse(TbSvcUniformMin.Text, out double smin) ? smin : 1.5;
-                double uMax = double.TryParse(TbSvcUniformMax.Text, out double smax) ? smax : 4.5;
-                svcVar = Math.Pow(uMax - uMin, 2) / 12.0;
-            }
-            else if (CbServiceDist.SelectedIndex == 2) // Normal
-            {
-                double std = double.TryParse(TbSvcNormalStd.Text, out double sst) ? sst : 1.0;
-                svcVar = std * std;
-            }
-        }
 
         QueueMetrics? metrics = null;
         string? error = null;
@@ -266,12 +282,19 @@ public partial class QueuingModelsView : UserControl
                 break;
         }
 
+        if (inputError != null) error = inputError;
+
         // Update stability
         if (error != null || metrics == null || rho >= 1.0)
         {
+            // Only ρ ≥ 1 means "unstable"; other errors are invalid inputs or calculator limits
+            bool unstable = inputError == null && rho >= 1.0;
+            string none = unstable ? "∞" : "—";
+
             BorderStability.Background = (Brush)FindResource("StatusRedBg");
+            FuelQ.Controls.Motion.SetPulsing(BorderStability, unstable);
             BorderStability.BorderBrush = (Brush)FindResource("StatusRedBorder");
-            TxtStabilityTitle.Text = "⚠ SYSTEM UNSTABLE  (ρ ≥ 1.0)";
+            TxtStabilityTitle.Text = unstable ? "⚠ SYSTEM UNSTABLE  (ρ ≥ 1.0)" : "⚠ CANNOT COMPUTE";
             TxtStabilityTitle.Foreground = (Brush)FindResource("StatusRedText");
             TxtStabilityDetail.Text = error ?? $"Arrival rate exceeds service capacity (λ={lambda:F4} ≥ {s}×μ={s * mu:F4}). Queue grows without bound.";
 
@@ -279,20 +302,26 @@ public partial class QueuingModelsView : UserControl
             MetricMu.Text = $"{mu:F4}";
             MetricA.Text = $"{a:F4}";
             MetricRho.Text = $"{rho * 100:F1}%";
-            MetricP0.Text = "0.0%";
-            MetricPw.Text = "100.0%";
-            MetricLq.Text = "∞";
-            MetricWq.Text = "∞";
-            MetricL.Text = "∞";
-            MetricW.Text = "∞";
+            MetricP0.Text = unstable ? "0.0%" : "—";
+            MetricPw.Text = unstable ? "100.0%" : "—";
+            MetricLq.Text = none;
+            MetricWq.Text = none;
+            MetricL.Text = none;
+            MetricW.Text = none;
 
-            TxtFormulaBreakdown.Text = "System is in non-stationary / saturated state. Infinite queue growth.";
-            TxtFormulaDetails.Text = "Increase pump count (s) or service rate (μ) to restore stability.";
+            TxtFormulaBreakdown.Text = unstable
+                ? "System is in non-stationary / saturated state. Infinite queue growth."
+                : "No result: fix the input shown above.";
+            TxtFormulaDetails.Text = unstable
+                ? "Increase pump count (s) or service rate (μ) to restore stability."
+                : string.Empty;
             GridStateProbabilities.ItemsSource = null;
+            TxtPnUnavailable.Visibility = Visibility.Collapsed;
             return;
         }
 
         BorderStability.Background = (Brush)FindResource("StatusGreenBg");
+        FuelQ.Controls.Motion.SetPulsing(BorderStability, false);
         BorderStability.BorderBrush = (Brush)FindResource("StatusGreenBorder");
         TxtStabilityTitle.Text = $"✓ SYSTEM STABLE  (ρ = {metrics.Rho * 100:F1}% < 1.0)";
         TxtStabilityTitle.Foreground = (Brush)FindResource("StatusGreenText");
@@ -316,7 +345,14 @@ public partial class QueuingModelsView : UserControl
         TxtFormulaBreakdown.Text = metrics.FormulaUsed;
         TxtFormulaDetails.Text = $"Model: {metrics.ModelName}  |  Ca = {metrics.Ca:F3}  |  Cs = {metrics.Cs:F3}  |  Servers = {metrics.S}";
 
-        // State Probabilities
+        // State Probabilities: exact only for M/M/1 and M/M/s
+        TxtPnUnavailable.Visibility = metrics.HasExactStateProbabilities ? Visibility.Collapsed : Visibility.Visible;
+        if (!metrics.HasExactStateProbabilities)
+        {
+            GridStateProbabilities.ItemsSource = null;
+            return;
+        }
+
         var probRows = new List<StateProbabilityRow>();
         double cum = 0;
         for (int n = 0; n <= 10; n++)
@@ -332,5 +368,40 @@ public partial class QueuingModelsView : UserControl
             });
         }
         GridStateProbabilities.ItemsSource = probRows;
+    }
+
+    /// <summary>Mean and variance of Uniform[a, b] from the two bound boxes, with an error if the bounds are invalid.</summary>
+    private static (double Mean, double Variance, string? Error) UniformMoments(
+        string minText, string maxText, double defaultMin, double defaultMax, string what)
+    {
+        double a = double.TryParse(minText, out double pa) ? pa : defaultMin;
+        double b = double.TryParse(maxText, out double pb) ? pb : defaultMax;
+        if (a < 0 || b <= a)
+            return ((defaultMin + defaultMax) / 2.0, Math.Pow(defaultMax - defaultMin, 2) / 12.0,
+                    $"Uniform {what} bounds need 0 ≤ a < b (got a = {a}, b = {b}).");
+        return ((a + b) / 2.0, (b - a) * (b - a) / 12.0, null);
+    }
+
+    /// <summary>Writes a derived value into a read-only box without re-triggering Recalculate.</summary>
+    private void ShowDerivedValue(TextBox box, double value)
+    {
+        string text = value.ToString("0.####");
+        if (box.Text == text) return;
+        _syncingInputs = true;
+        try { box.Text = text; }
+        finally { _syncingInputs = false; }
+    }
+
+    private void UpdateHints(bool arrUniform, bool svcUniform)
+    {
+        bool arrMean = RbArrivalMean.IsChecked == true;
+        TxtArrivalHint.Text = arrUniform
+            ? "Derived from Uniform bounds: mean = (a + b) / 2 (edit a and b below)"
+            : arrMean ? "λ = 1 ÷ this value (Mean headway between vehicle arrivals)" : "Used directly as arrival rate λ";
+
+        bool svcMean = RbServiceMean.IsChecked == true;
+        TxtServiceHint.Text = svcUniform
+            ? "Derived from Uniform bounds: mean = (a + b) / 2 (edit a and b below)"
+            : svcMean ? "μ = 1 ÷ this value (Mean duration to fuel one vehicle)" : "Used directly as service rate μ";
     }
 }

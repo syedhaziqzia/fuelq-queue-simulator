@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using FuelQ.Distributions;
 
 namespace FuelQ.Statistics;
 
@@ -19,18 +20,25 @@ public static class ChiSquareGoodnessOfFit
         double[] Expected,
         double[] BinEdges);
 
-    /// <param name="records">Clean (non-outlier) records to test.</param>
-    /// <param name="k">Number of equal-probability bins (default 10, requires k-1-p df).</param>
+    /// <param name="records">
+    /// Records to test. All inter-arrival times are used, including any flagged as
+    /// service-time outliers: trimming the long right tail of exponential data would
+    /// bias λ̂ upwards and make the test reject true exponential data too often.
+    /// </param>
+    /// <param name="k">Number of equal-probability bins (default 10, df = k − 2).</param>
     /// <param name="alpha">Significance level (default 0.05).</param>
     public static Result Run(
         IList<ForecourtObservationRecord> records,
         int k = 10, double alpha = 0.05)
     {
-        var clean = records.Where(r => !r.IsOutlier).ToList();
-        int n     = clean.Count;
+        int n = records.Count;
+        if (n == 0)
+            throw new ArgumentException("At least one record is required.", nameof(records));
+        if (k < 3)
+            throw new ArgumentOutOfRangeException(nameof(k), "Need at least 3 bins (df = k − 2 must be ≥ 1).");
 
-        double[] iats = [.. clean.Select(r => r.InterArrivalTime).OrderBy(x => x)];
-        double mean   = iats.Length > 0 ? iats.Average() : 1.0;
+        double[] iats = [.. records.Select(r => r.InterArrivalTime).OrderBy(x => x)];
+        double mean   = iats.Average();
         double lambda = mean > 0 ? 1.0 / mean : 1.0;
 
         // Equal-probability bins: each bin contains expected n/k observations
@@ -70,18 +78,15 @@ public static class ChiSquareGoodnessOfFit
         return new Result(k, df, chiSqStat, critical, pValue, h0, lambda, observed, expectedArr, edges);
     }
 
-    // Wilson-Hilferty approximation for chi-square CDF
+    /// <summary>Exact chi-square CDF: F(x; df) = P(df/2, x/2), the regularized lower incomplete gamma.</summary>
     public static double ChiSquareCDF(double x, int df)
     {
+        if (df < 1) throw new ArgumentOutOfRangeException(nameof(df), "df must be ≥ 1.");
         if (x <= 0) return 0;
-        double mu     = df;
-        double h      = Math.Pow(x / mu, 1.0 / 3.0) - (1.0 - 2.0 / (9.0 * mu));
-        double denom  = Math.Sqrt(2.0 / (9.0 * mu));
-        double z      = h / denom;
-        return NormalCDF(z);
+        return GammaDistribution.LowerIncompleteGammaRatio(df / 2.0, x / 2.0);
     }
 
-    // chi-square critical value via binary search
+    // chi-square critical value via binary search on the exact CDF
     public static double ChiSquareCritical(int df, double alpha)
     {
         double lo = 0, hi = 200;
@@ -94,19 +99,5 @@ public static class ChiSquareGoodnessOfFit
                 hi = mid;
         }
         return Math.Round((lo + hi) / 2, 3);
-    }
-
-    private static double NormalCDF(double z)
-    {
-        return 0.5 * (1.0 + Erf(z / Math.Sqrt(2)));
-    }
-
-    private static double Erf(double z)
-    {
-        double t = 1.0 / (1.0 + 0.3275911 * Math.Abs(z));
-        double poly = t * (0.254829592 + t * (-0.284496736 +
-                     t * (1.421413741 + t * (-1.453152027 + t * 1.061405429))));
-        double result = 1.0 - poly * Math.Exp(-z * z);
-        return z < 0 ? -result : result;
     }
 }

@@ -16,7 +16,7 @@ public sealed class ExponentialDistribution : IDistribution
     public double Mean     => 1.0 / _lambda;
     public double Variance => 1.0 / (_lambda * _lambda);
 
-    /// <summary>Inverse-transform sampling: X = -ln(1-U)/λ</summary>
+    /// <summary>Inverse-transform sampling: X = −ln(U)/λ (U and 1−U have the same distribution)</summary>
     public double Sample(Random rng)
     {
         double u = rng.NextDouble();

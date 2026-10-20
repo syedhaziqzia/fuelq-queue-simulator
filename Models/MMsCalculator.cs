@@ -13,8 +13,9 @@ public static class MMsCalculator
             return (null, "Both λ and μ must be positive numbers.");
         if (s < 1)
             return (null, "Number of servers s must be ≥ 1.");
+        // Practical UI limit only: a double factorial does not overflow until 171!.
         if (s > 50)
-            return (null, "Number of servers s must be ≤ 50 (Factorial overflow above this limit).");
+            return (null, "s > 50 is not supported by this calculator (enter 50 pumps or fewer).");
         if (lambda >= s * mu)
             return (null, $"System is UNSTABLE: Total arrival rate λ ({lambda:F4}) ≥ Total service capacity s·μ ({s * mu:F4}). Utilization ρ ≥ 1.");
 
@@ -56,7 +57,8 @@ public static class MMsCalculator
             Ca: 1.0,
             Cs: 1.0,
             ModelName: $"M/M/{s}",
-            FormulaUsed: formula
+            FormulaUsed: formula,
+            HasExactStateProbabilities: true
         );
 
         return (metrics, null);

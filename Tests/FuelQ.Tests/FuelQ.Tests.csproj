@@ -1,0 +1,24 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!--
+    Zero-dependency verification suite for FuelQ's non-UI logic.
+    Compiles the app's Models, Distributions, Simulation and Statistics sources
+    directly (no WPF). Run it from the repository root with:
+      dotnet run (project) Tests/FuelQ.Tests
+  -->
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <RootNamespace>FuelQ.Tests</RootNamespace>
+    <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="*.cs" />
+    <Compile Include="..\..\Models\*.cs" LinkBase="App\Models" />
+    <Compile Include="..\..\Distributions\*.cs" LinkBase="App\Distributions" />
+    <Compile Include="..\..\Simulation\*.cs" LinkBase="App\Simulation" />
+    <Compile Include="..\..\Statistics\*.cs" LinkBase="App\Statistics" />
+  </ItemGroup>
+</Project>

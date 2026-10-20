@@ -7,9 +7,11 @@ using FuelQ.Distributions;
 namespace FuelQ.Statistics;
 
 /// <summary>
-/// Manages the Shell Maskan empirical dataset:
-/// auto-generates a realistic 320-row baseline CSV on first run,
-/// and supports loading external CSVs via file path.
+/// Manages the Shell Maskan observation dataset:
+/// generates a 320-row SYNTHETIC baseline (Exp(2.8/min) inter-arrivals,
+/// uniform service times) and supports loading real field CSVs via file path.
+/// The synthetic baseline is not field data: a χ² test on it only
+/// demonstrates the method, it does not validate the site.
 /// </summary>
 public static class DatasetIngestionEngine
 {
@@ -121,32 +123,32 @@ public static class DatasetIngestionEngine
             var cols = line.Split(',');
             if (cols.Length < 14) continue;
 
-            try
+            // Skip rows whose numeric columns cannot be parsed
+            if (!TryParseD(cols[3], out double iat) || !TryParseD(cols[5], out double svc) ||
+                !TryParseD(cols[6], out double disp) || !TryParseD(cols[12], out double total))
             {
-                records.Add(new ForecourtObservationRecord
-                {
-                    VehicleId          = cols[0].Trim(),
-                    VehicleType        = cols[1].Trim(),
-                    ArrivalTime        = cols[2].Trim(),
-                    InterArrivalTime   = ParseD(cols[3]),
-                    ServiceStartTime   = cols[4].Trim(),
-                    ServiceDuration    = ParseD(cols[5]),
-                    DispensingDuration = ParseD(cols[6]),
-                    PaymentMethod      = cols[7].Trim(),
-                    FuelGrade          = cols[8].Trim(),
-                    ExtraService       = cols[9].Trim(),
-                    ReceiptIssued      = cols[10].Trim().Equals("True", StringComparison.OrdinalIgnoreCase) ||
-                                        cols[10].Trim().Equals("Yes",  StringComparison.OrdinalIgnoreCase),
-                    ServiceEndTime     = cols[11].Trim(),
-                    TotalSystemTime    = ParseD(cols[12]),
-                    IsOutlier          = false
-                });
-            }
-            catch (FormatException)
-            {
-                // Skip malformed rows (column value cannot be parsed)
                 System.Diagnostics.Debug.WriteLine($"[DatasetIngestionEngine] Skipping malformed row {lineNum}.");
+                continue;
             }
+
+            records.Add(new ForecourtObservationRecord
+            {
+                VehicleId          = cols[0].Trim(),
+                VehicleType        = cols[1].Trim(),
+                ArrivalTime        = cols[2].Trim(),
+                InterArrivalTime   = iat,
+                ServiceStartTime   = cols[4].Trim(),
+                ServiceDuration    = svc,
+                DispensingDuration = disp,
+                PaymentMethod      = cols[7].Trim(),
+                FuelGrade          = cols[8].Trim(),
+                ExtraService       = cols[9].Trim(),
+                ReceiptIssued      = cols[10].Trim().Equals("True", StringComparison.OrdinalIgnoreCase) ||
+                                    cols[10].Trim().Equals("Yes",  StringComparison.OrdinalIgnoreCase),
+                ServiceEndTime     = cols[11].Trim(),
+                TotalSystemTime    = total,
+                IsOutlier          = false
+            });
         }
         return records;
     }
@@ -180,6 +182,7 @@ public static class DatasetIngestionEngine
         return ts.ToString(@"hh\:mm\:ss");
     }
 
-    private static double ParseD(string s) =>
-        double.TryParse(s.Trim(), NumberStyles.Any, CultureInfo.InvariantCulture, out double v) ? v : 0;
+    // Invariant culture so "3.0" parses the same on comma-decimal Windows locales
+    private static bool TryParseD(string s, out double v) =>
+        double.TryParse(s.Trim(), NumberStyles.Float, CultureInfo.InvariantCulture, out v);
 }

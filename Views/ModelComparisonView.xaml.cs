@@ -30,9 +30,20 @@ public partial class ModelComparisonView : UserControl
     }
 
     private List<CompRow>? _lastRows;
-    private double _lambdaPerMin, _muPerMin;
 
-    public ModelComparisonView() { InitializeComponent(); }
+    private bool _autoRan;
+
+    public ModelComparisonView()
+    {
+        InitializeComponent();
+        // Fill the page on first visit so it never opens empty
+        Loaded += (_, _) =>
+        {
+            if (_autoRan) return;
+            _autoRan = true;
+            RunComparison_Click(BtnRunComparison, new RoutedEventArgs());
+        };
+    }
 
     private async void RunComparison_Click(object sender, RoutedEventArgs e)
     {
@@ -44,8 +55,8 @@ public partial class ModelComparisonView : UserControl
 
         try
         {
-            _lambdaPerMin = lambda; _muPerMin = mu;
-            double sigmaPerSec = sigma / 60.0;
+            // The calculators are unit-agnostic: rates in veh/min give Wq and W in minutes.
+            double variance = sigma * sigma;   // σ entered in minutes → Var(S) in min²
 
             List<CompRow> rows = await Task.Run(() =>
             {
@@ -59,19 +70,19 @@ public partial class ModelComparisonView : UserControl
                     MD1Calculator.Calculate(lambda, 1.0 / mu), false, "—");
 
                 AddAnalytical(r, "M/G/1", "General Service (P-K)",
-                    MG1Calculator.Calculate(lambda, mu, sigmaPerSec), false, "—");
+                    MG1Calculator.Calculate(lambda, mu, variance), false, "—");
 
                 AddAnalytical(r, $"M/E{k}/1", $"Erlang-{k} Multi-Stage",
-                    MEk1Calculator.Calculate(lambda, mu, k), false, "—");
+                    MEk1Calculator.Calculate(lambda, 1.0 / mu, k), false, "—");   // expects mean service time, not μ
 
-                // M/M/c ★ Best Field Fit
                 AddAnalytical(r, $"M/M/c (c={c})", "Multi-Server Erlang-C",
-                    MMcCalculator.Calculate(lambda, mu, c), true, "★ Best Field Fit (Maskan Site)");
+                    MMcCalculator.Calculate(lambda, mu, c), true, $"★ Matches {c}-pump layout");
 
-                // DES Simulation — bike service ≈ 1/35 veh/s, car service ≈ 1/85 veh/s (calibrated)
+                // Forecourt DES (one run) — uses its own service model: bikes Exp(35 s), cars Exp(85 s)
+                // plus POS and delay addends; only λ and c come from the inputs above.
                 var cfg = new ForecourtConfig(
                     NumServers:         c,
-                    ArrivalRate:        lambda / 60.0,
+                    ArrivalRate:        lambda / 60.0,   // veh/min → veh/s
                     BikeServiceRate:    1.0 / 35.0,
                     CarServiceRate:     1.0 / 85.0,
                     SimDurationSeconds: 3600,
@@ -82,15 +93,15 @@ public partial class ModelComparisonView : UserControl
                 r.Add(new CompRow
                 {
                     ModelName    = "DES Simulation",
-                    TypeDesc     = "Empirical PriorityQueue",
+                    TypeDesc     = "Forecourt event-list DES (1 h)",
                     Rho          = $"{simRho * 100:F1}%",
-                    Lq           = $"{(sim.QueueTimeline.Count > 0 ? sim.QueueTimeline.Average(t => t.QLen) : 0):F2} veh",
+                    Lq           = $"{sim.AverageQueueLength:F2} veh",
                     Wq           = $"{sim.AverageWaitingTime / 60:F2} min",
-                    L            = $"{(sim.QueueTimeline.Count > 0 ? sim.QueueTimeline.Average(t => t.QLen) + simRho * c : 0):F2} veh",
+                    L            = $"{sim.AverageQueueLength + simRho * c:F2} veh",
                     W            = $"{sim.AverageSystemTime / 60:F2} min",
-                    P0           = $"{(1 - simRho) * 100:F1}%",
-                    Pwait        = $"{simRho * 100:F1}%",
-                    BestFitBadge = "✓ Validated DES",
+                    P0           = "—",   // not measured by the simulator
+                    Pwait        = "—",
+                    BestFitBadge = "Single run, seed 2026",
                     IsBestFit    = false
                 });
                 return r;
@@ -98,7 +109,7 @@ public partial class ModelComparisonView : UserControl
 
             _lastRows = rows;
             CompMatrix.ItemsSource = rows;
-            CalibrationLabel.Text  = "  ·  Calibration Delta: < 2.1%  |  Confidence: 99.4%";
+            CalibrationLabel.Text  = "  ·  DES row: one 1-hour run (seed 2026), no confidence interval";
 
             UpdateEfficiencyGain(lambda, mu, c);
             await DrawSensitivityCurveAsync(mu, c);
@@ -125,9 +136,9 @@ public partial class ModelComparisonView : UserControl
             TypeDesc     = type,
             Rho          = m != null ? $"{m.Rho * 100:F1}%" : "—",
             Lq           = m != null ? $"{m.Lq:F2} veh" : "—",
-            Wq           = m != null ? $"{m.Wq * 60:F2} min" : "—",
+            Wq           = m != null ? $"{m.Wq:F2} min" : "—",
             L            = m != null ? $"{m.L:F2} veh" : "—",
-            W            = m != null ? $"{m.W * 60:F2} min" : "—",
+            W            = m != null ? $"{m.W:F2} min" : "—",
             P0           = m != null ? $"{m.P0 * 100:F1}%" : "—",
             Pwait        = m != null ? $"{m.Pwait * 100:F1}%" : "—",
             BestFitBadge = badge,
@@ -142,9 +153,10 @@ public partial class ModelComparisonView : UserControl
         if (single == null || multi == null) return;
 
         double pct = single.Lq > 0 ? (single.Lq - multi.Lq) / single.Lq * 100 : 0;
+        EffHeaderLabel.Text = $"1-PUMP → {cBest}-PUMPS";
         EfficiencyPct.Text  = $"{pct:F1}%";
         EfficiencyDesc.Text = $"Transitioning from single-channel (M/M/1) to {cBest}-parallel dispensers (M/M/{cBest}) mitigates systemic bottle-necking.";
-        EffWq.Text  = $"{single.Wq * 60:F2}m → {multi.Wq * 60:F2}m ({multi.Wq * 60:F1}s)";
+        EffWq.Text  = $"{single.Wq:F2}m → {multi.Wq:F2}m ({multi.Wq * 60:F1}s)";
         EffLq.Text  = $"{single.Lq:F2} → {multi.Lq:F2} veh";
         EffP0.Text  = $"{(1 - multi.Pwait) * 100:F1}%";
     }
@@ -165,9 +177,9 @@ public partial class ModelComparisonView : UserControl
 
         SensitivityChart.SetSeries(
         [
-            (rhoArr, lqMM1, Color.FromRgb(0xF8, 0x71, 0x71), "M/M/1 (Uncontrolled)"),
-            (rhoArr, lqMD1, Color.FromRgb(0x38, 0xBD, 0xF8), "M/D/1 (P-K Lower)"),
-            (rhoArr, lqMMC, Color.FromRgb(0x34, 0xD3, 0x99), $"M/M/{c} (Maskan Layout)")
+            (rhoArr, lqMM1, Color.FromRgb(0xFF, 0x6B, 0x5E), "M/M/1 (Uncontrolled)"),
+            (rhoArr, lqMD1, Color.FromRgb(0x3E, 0xCF, 0xB2), "M/D/1 (P-K Lower)"),
+            (rhoArr, lqMMC, Color.FromRgb(0xFF, 0xB0, 0x20), $"M/M/{c} (Maskan Layout)")
         ]);
     }
 
@@ -221,8 +233,10 @@ public partial class ModelComparisonView : UserControl
         sb.AppendLine(@"\midrule");
         if (_lastRows != null)
         {
+            // Escape % and & so values like "81.8%" do not comment out the rest of the LaTeX row
+            static string Esc(string s) => s.Replace("&", @"\&").Replace("%", @"\%");
             foreach (var r in _lastRows)
-                sb.AppendLine($"{r.ModelName} & {r.TypeDesc} & {r.Rho} & {r.Lq} & {r.Wq} & {r.L} & {r.W} & {r.P0} & {r.Pwait} \\\\");
+                sb.AppendLine($"{Esc(r.ModelName)} & {Esc(r.TypeDesc)} & {Esc(r.Rho)} & {Esc(r.Lq)} & {Esc(r.Wq)} & {Esc(r.L)} & {Esc(r.W)} & {Esc(r.P0)} & {Esc(r.Pwait)} \\\\");
         }
         sb.AppendLine(@"\bottomrule");
         sb.AppendLine(@"\end{tabular}");
@@ -247,15 +261,10 @@ public partial class ModelComparisonView : UserControl
             return false;
         }
 
-        // Apply bounds before converting units
+        // Apply bounds; all values stay in minutes
         c = Math.Max(1, Math.Min(c, 20));   // clamp servers 1–20
         k = Math.Max(1, Math.Min(k, 20));   // clamp Erlang phases 1–20
         sigma = Math.Max(0, sigma);
-
-        // Convert per-minute inputs to per-second for internal calculators
-        lambda /= 60.0;
-        mu     /= 60.0;
-        sigma  /= 60.0;
 
         if (lambda <= 0 || mu <= 0)
         {
