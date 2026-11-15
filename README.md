@@ -76,10 +76,10 @@ To run any C# program, your computer needs the free **.NET SDK** from Microsoft.
    *(Or click **Code → Download ZIP** on GitHub and extract the folder.)*
 
 2. **Open the Project Folder:**
-   In VS Code, go to **File $\rightarrow$ Open Folder...** and select the cloned or downloaded `fuelq-queue-simulator` folder.
+   In VS Code, go to **File → Open Folder...** and select the cloned or downloaded `fuelq-queue-simulator` folder.
 
 3. **Open the Integrated Terminal:**
-   Press ``Ctrl + ` `` (backtick) or go to **Terminal $\rightarrow$ New Terminal**.
+   Press ``Ctrl + ` `` (backtick) or go to **Terminal → New Terminal**.
 
 4. **Run the Project:**
    Type the following command and press **Enter**:
@@ -151,7 +151,7 @@ To run any C# program, your computer needs the free **.NET SDK** from Microsoft.
 
 ## 📐 Mathematical Formulas Reference
 
-| Kendall Model | Queue Length ($L_q$) / Wait Time ($W_q$) Formula | Classification |
+| Kendall Model | Queue Length (L<sub>q</sub>) / Wait Time (W<sub>q</sub>) Formula | Classification |
 | :--- | :--- | :--- |
 | **M/M/1** | `Lq = ρ² / (1 - ρ)` | Exact closed-form |
 | **M/M/s** | `Lq = [C(s, a) · ρ] / (1 - ρ)` *(where C(s, a) is Erlang-C)* | Exact closed-form |
