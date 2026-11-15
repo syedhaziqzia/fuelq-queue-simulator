@@ -13,23 +13,23 @@
             <TextBlock Text="Traceability Log  ·  Course-Derived Prompts, Architectural Iterations &amp; Theoretical Validation"
                        Foreground="{StaticResource TextSecondary}" FontSize="12.5" Margin="0,0,0,22"/>
 
-            <!-- SECTION 1: AI Prompt Engineering & Iterative Development History -->
+            <!-- SECTION 1: AI Prompt Engineering & Queueing Model Formulations -->
             <Border Background="{StaticResource CardSurface}"
                     BorderBrush="{StaticResource CardBorder}"
                     BorderThickness="1" CornerRadius="10"
                     Margin="0,0,0,20" Padding="20,16">
                 <StackPanel>
                     <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
-                        <TextBlock Text="Development Prompts &amp; Iteration History"
+                        <TextBlock Text="Queueing Theory Models · Mathematical Formulation Prompts"
                                    Style="{StaticResource CardTitle}"/>
                         <Border Background="{StaticResource AccentBlueBrush}" CornerRadius="4" Padding="6,2" Margin="10,0,0,0" VerticalAlignment="Center">
-                            <TextBlock Text="5 Phased Prompts" FontSize="9.5" Foreground="White" FontWeight="Bold"/>
+                            <TextBlock Text="6 Model Prompts" FontSize="9.5" Foreground="White" FontWeight="Bold"/>
                         </Border>
                     </StackPanel>
-                    <TextBlock Text="The structured prompts used to build FuelQ step-by-step, created from our Modeling &amp; Simulation lecture notes, formulas, and the Shell Maskan forecourt setting."
+                    <TextBlock Text="Individual mathematical prompts used to formulate, implement, and verify each analytical and approximation queueing model in FuelQ, derived directly from course syllabus notes, Kendall notation, and Shell Maskan forecourt operational parameters."
                                Foreground="{StaticResource TextSecondary}" FontSize="12" Margin="0,0,0,16" TextWrapping="Wrap"/>
 
-                    <!-- PROMPT 1: UI & Layout Shell -->
+                    <!-- PROMPT 1: M/M/1 Single Server -->
                     <Border Background="{StaticResource InputSurface}" BorderBrush="{StaticResource CardBorder}" BorderThickness="1" CornerRadius="8" Margin="0,0,0,14" Padding="14,12">
                         <StackPanel>
                             <Grid Margin="0,0,0,8">
@@ -39,7 +39,187 @@
                                     <ColumnDefinition Width="Auto"/>
                                 </Grid.ColumnDefinitions>
                                 <Border Grid.Column="0" Background="#2A2314" CornerRadius="4" Padding="6,2" Margin="0,0,8,0">
-                                    <TextBlock Text="Phase 1 · v1.0" FontSize="10" FontWeight="Bold" Foreground="#FFC95C"/>
+                                    <TextBlock Text="Model 1 · M/M/1" FontSize="10" FontWeight="Bold" Foreground="#FFC95C"/>
+                                </Border>
+                                <TextBlock Grid.Column="1" Text="Single-Server Markovian Queue (Exact Baseline)" FontWeight="SemiBold" Foreground="{StaticResource TextPrimary}" FontSize="13" VerticalAlignment="Center"/>
+                                <Border Grid.Column="2" Background="{StaticResource StatusGreenBg}" BorderBrush="{StaticResource StatusGreenBorder}" BorderThickness="1" CornerRadius="4" Padding="6,2">
+                                    <TextBlock Text="Exact Closed-Form" FontSize="9.5" Foreground="{StaticResource StatusGreenText}" FontWeight="Bold"/>
+                                </Border>
+                            </Grid>
+
+                            <Border Background="#0E0D0B" BorderBrush="#2E2A23" BorderThickness="1" CornerRadius="6" Padding="12,10" Margin="0,0,0,8">
+                                <TextBlock TextWrapping="Wrap" FontFamily="Consolas" FontSize="11.5" Foreground="#DDD5C7" LineHeight="17">
+                                    <Run Foreground="{StaticResource AccentCyanBrush}" Text="Prompt: "/><Run Text="&quot;Implement the foundational single-server M/M/1 analytical queue solver for our forecourt project, establishing our baseline for Poisson vehicle arrivals (rate λ) and exponential dispensing times (rate μ). Check if the queue is unstable (λ ≥ μ or ρ ≥ 1) and return an explicit error. When stable, derive the primary closed-form metrics: traffic intensity a = ρ = λ/μ, average queue length Lq = ρ²/(1−ρ), waiting time in queue Wq = Lq/λ, total system time W = Wq + 1/μ, and total vehicles in system L = λ·W. Calculate idle probability P₀ = 1−ρ, probability of delay Pw = ρ, and compute the geometric state probabilities P(n) = (1−ρ)·ρⁿ for n = 0 to 10.&quot;"/>
+                                </TextBlock>
+                            </Border>
+                            <TextBlock Text="Result: MM1Calculator.cs, foundational single-server closed-form solver, stability validation, and geometric state distribution P(n)." FontSize="11" Foreground="{StaticResource TextSecondary}"/>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- PROMPT 2: M/M/s Multi-Server Erlang-C -->
+                    <Border Background="{StaticResource InputSurface}" BorderBrush="{StaticResource CardBorder}" BorderThickness="1" CornerRadius="8" Margin="0,0,0,14" Padding="14,12">
+                        <StackPanel>
+                            <Grid Margin="0,0,0,8">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <Border Grid.Column="0" Background="#2A2314" CornerRadius="4" Padding="6,2" Margin="0,0,8,0">
+                                    <TextBlock Text="Model 2 · M/M/s" FontSize="10" FontWeight="Bold" Foreground="#FFC95C"/>
+                                </Border>
+                                <TextBlock Grid.Column="1" Text="Multi-Server Erlang-C Forecourt Dispenser Model" FontWeight="SemiBold" Foreground="{StaticResource TextPrimary}" FontSize="13" VerticalAlignment="Center"/>
+                                <Border Grid.Column="2" Background="{StaticResource StatusGreenBg}" BorderBrush="{StaticResource StatusGreenBorder}" BorderThickness="1" CornerRadius="4" Padding="6,2">
+                                    <TextBlock Text="Erlang-C Formulation" FontSize="9.5" Foreground="{StaticResource StatusGreenText}" FontWeight="Bold"/>
+                                </Border>
+                            </Grid>
+
+                            <Border Background="#0E0D0B" BorderBrush="#2E2A23" BorderThickness="1" CornerRadius="6" Padding="12,10" Margin="0,0,0,8">
+                                <TextBlock TextWrapping="Wrap" FontFamily="Consolas" FontSize="11.5" Foreground="#DDD5C7" LineHeight="17">
+                                    <Run Foreground="{StaticResource AccentCyanBrush}" Text="Prompt: "/><Run Text="&quot;Building upon the M/M/1 baseline, implement the multi-server M/M/s queue calculator to model s parallel pumps at the Shell Maskan forecourt sharing arrival rate λ with service rate μ per pump. Verify multi-server stability λ &lt; s·μ and allow up to s = 50 servers. Calculate offered load a = λ/μ and server utilization ρ = a/s. Implement the Erlang-C formulas: compute P₀ via summation P₀ = [∑(aⁿ/n!) + (aˢ/(s!(1−ρ)))]⁻¹ with factorial overflow handling, then compute Erlang-C delay probability Pw = C(s, a) = [aˢ/(s!(1−ρ))]·P₀. Evaluate queue length Lq = Pw·ρ/(1−ρ), queue wait Wq = Lq/λ, system time W = Wq + 1/μ, and total vehicles L = λ·W, supporting piecewise state probabilities P(n) for n = 0 to 10.&quot;"/>
+                                </TextBlock>
+                            </Border>
+                            <TextBlock Text="Result: MMsCalculator.cs, multi-server Erlang-C expansion from M/M/1, factorial scaling up to s=50, and piecewise state distribution." FontSize="11" Foreground="{StaticResource TextSecondary}"/>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- PROMPT 3: M/G/1 Pollaczek-Khinchine -->
+                    <Border Background="{StaticResource InputSurface}" BorderBrush="{StaticResource CardBorder}" BorderThickness="1" CornerRadius="8" Margin="0,0,0,14" Padding="14,12">
+                        <StackPanel>
+                            <Grid Margin="0,0,0,8">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <Border Grid.Column="0" Background="#2A2314" CornerRadius="4" Padding="6,2" Margin="0,0,8,0">
+                                    <TextBlock Text="Model 3 · M/G/1" FontSize="10" FontWeight="Bold" Foreground="#FFC95C"/>
+                                </Border>
+                                <TextBlock Grid.Column="1" Text="Single-Server General Service Queue (Pollaczek-Khinchine)" FontWeight="SemiBold" Foreground="{StaticResource TextPrimary}" FontSize="13" VerticalAlignment="Center"/>
+                                <Border Grid.Column="2" Background="{StaticResource StatusGreenBg}" BorderBrush="{StaticResource StatusGreenBorder}" BorderThickness="1" CornerRadius="4" Padding="6,2">
+                                    <TextBlock Text="Pollaczek-Khinchine" FontSize="9.5" Foreground="{StaticResource StatusGreenText}" FontWeight="Bold"/>
+                                </Border>
+                            </Grid>
+
+                            <Border Background="#0E0D0B" BorderBrush="#2E2A23" BorderThickness="1" CornerRadius="6" Padding="12,10" Margin="0,0,0,8">
+                                <TextBlock TextWrapping="Wrap" FontFamily="Consolas" FontSize="11.5" Foreground="#DDD5C7" LineHeight="17">
+                                    <Run Foreground="{StaticResource AccentCyanBrush}" Text="Prompt: "/><Run Text="&quot;Extend our queueing framework by relaxing the exponential service assumption: implement an M/G/1 single-server queue calculator where vehicle arrivals remain Poisson (λ) but dispensing follows an arbitrary general distribution with mean 1/μ and variance σ². Verify stability λ &lt; μ. Implement the exact Pollaczek-Khinchine (P-K) formula: determine the second moment E[S²] = (1/μ)² + σ², coefficient of variation Cs = σ/(1/μ), and expected queue wait Wq = [λ·(σ² + 1/μ²)] / [2·(1−ρ)]. Derive Lq = λ·Wq, W = Wq + 1/μ, and L = λ·W. Explicitly suppress the geometric P(n) state table as it is invalid for general service, and confirm that setting σ² = 0 reduces cleanly to M/D/1 determinism.&quot;"/>
+                                </TextBlock>
+                            </Border>
+                            <TextBlock Text="Result: MG1Calculator.cs, Pollaczek-Khinchine (P-K) general service formulation, second-moment calculation, and M/D/1 determinism verification." FontSize="11" Foreground="{StaticResource TextSecondary}"/>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- PROMPT 4: M/G/s Allen-Cunneen -->
+                    <Border Background="{StaticResource InputSurface}" BorderBrush="{StaticResource CardBorder}" BorderThickness="1" CornerRadius="8" Margin="0,0,0,14" Padding="14,12">
+                        <StackPanel>
+                            <Grid Margin="0,0,0,8">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <Border Grid.Column="0" Background="#2A2314" CornerRadius="4" Padding="6,2" Margin="0,0,8,0">
+                                    <TextBlock Text="Model 4 · M/G/s" FontSize="10" FontWeight="Bold" Foreground="#FFC95C"/>
+                                </Border>
+                                <TextBlock Grid.Column="1" Text="Multi-Server General Service Queue (Allen-Cunneen Approx)" FontWeight="SemiBold" Foreground="{StaticResource TextPrimary}" FontSize="13" VerticalAlignment="Center"/>
+                                <Border Grid.Column="2" Background="{StaticResource StatusGreenBg}" BorderBrush="{StaticResource StatusGreenBorder}" BorderThickness="1" CornerRadius="4" Padding="6,2">
+                                    <TextBlock Text="Allen-Cunneen Approx" FontSize="9.5" Foreground="{StaticResource StatusGreenText}" FontWeight="Bold"/>
+                                </Border>
+                            </Grid>
+
+                            <Border Background="#0E0D0B" BorderBrush="#2E2A23" BorderThickness="1" CornerRadius="6" Padding="12,10" Margin="0,0,0,8">
+                                <TextBlock TextWrapping="Wrap" FontFamily="Consolas" FontSize="11.5" Foreground="#DDD5C7" LineHeight="17">
+                                    <Run Foreground="{StaticResource AccentCyanBrush}" Text="Prompt: "/><Run Text="&quot;Following the single-server M/G/1 model, implement the multi-server M/G/s calculator to evaluate s parallel dispensers under Poisson arrivals (λ) and general service variance σ². Because exact closed-form solutions do not exist for multi-server general service, implement the Allen-Cunneen approximation by bridging our M/M/s engine. Verify stability λ &lt; s·μ and calculate baseline M/M/s waiting time Wq(M/M/s). Compute the squared coefficient of variation of service Cs² = σ² / (1/μ)², then scale expected queue wait using Wq ≈ [(1 + Cs²)/2] × Wq(M/M/s). Derive Lq = λ·Wq, W = Wq + 1/μ, and L = λ·W, adopting Erlang-C P₀ and Pw as operational bounds.&quot;"/>
+                                </TextBlock>
+                            </Border>
+                            <TextBlock Text="Result: MGsCalculator.cs, Allen-Cunneen multi-server approximation scaling baseline Erlang-C metrics by (1 + Cs²)/2 with variance sensitivity." FontSize="11" Foreground="{StaticResource TextSecondary}"/>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- PROMPT 5: G/G/1 Kingman -->
+                    <Border Background="{StaticResource InputSurface}" BorderBrush="{StaticResource CardBorder}" BorderThickness="1" CornerRadius="8" Margin="0,0,0,14" Padding="14,12">
+                        <StackPanel>
+                            <Grid Margin="0,0,0,8">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <Border Grid.Column="0" Background="#2A2314" CornerRadius="4" Padding="6,2" Margin="0,0,8,0">
+                                    <TextBlock Text="Model 5 · G/G/1" FontSize="10" FontWeight="Bold" Foreground="#FFC95C"/>
+                                </Border>
+                                <TextBlock Grid.Column="1" Text="Single-Server General Arrivals &amp; Service (Kingman Formula)" FontWeight="SemiBold" Foreground="{StaticResource TextPrimary}" FontSize="13" VerticalAlignment="Center"/>
+                                <Border Grid.Column="2" Background="{StaticResource StatusGreenBg}" BorderBrush="{StaticResource StatusGreenBorder}" BorderThickness="1" CornerRadius="4" Padding="6,2">
+                                    <TextBlock Text="Kingman Heavy-Traffic" FontSize="9.5" Foreground="{StaticResource StatusGreenText}" FontWeight="Bold"/>
+                                </Border>
+                            </Grid>
+
+                            <Border Background="#0E0D0B" BorderBrush="#2E2A23" BorderThickness="1" CornerRadius="6" Padding="12,10" Margin="0,0,0,8">
+                                <TextBlock TextWrapping="Wrap" FontFamily="Consolas" FontSize="11.5" Foreground="#DDD5C7" LineHeight="17">
+                                    <Run Foreground="{StaticResource AccentCyanBrush}" Text="Prompt: "/><Run Text="&quot;Advance our queueing suite to arbitrary distributions for both traffic and fueling: implement the single-server G/G/1 calculator parameterized by arrival rate λ, arrival variance σA², service rate μ, and service variance σS². Enforce stability λ &lt; μ and calculate squared coefficients of variation Ca² = σA²/(1/λ)² and Cs² = σS²/(1/μ)². Implement Kingman's heavy-traffic approximation formula: Wq ≈ [(Ca² + Cs²)/2] × [ρ/(1−ρ)] × (1/μ). Compute Lq = λ·Wq, W = Wq + 1/μ, and L = λ·W. Include notes explaining that Kingman provides an asymptotic upper bound that attains highest precision under heavy traffic loads (ρ → 1.0) and generalizes our earlier M/M/1 and M/G/1 models.&quot;"/>
+                                </TextBlock>
+                            </Border>
+                            <TextBlock Text="Result: GG1Calculator.cs, Kingman heavy-traffic approximation engine, dual arrival/service variability handling (Ca², Cs²), and upper-bound estimation." FontSize="11" Foreground="{StaticResource TextSecondary}"/>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- PROMPT 6: G/G/s Allen-Cunneen General -->
+                    <Border Background="{StaticResource InputSurface}" BorderBrush="{StaticResource CardBorder}" BorderThickness="1" CornerRadius="8" Margin="0,0,0,0" Padding="14,12">
+                        <StackPanel>
+                            <Grid Margin="0,0,0,8">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <Border Grid.Column="0" Background="#2A2314" CornerRadius="4" Padding="6,2" Margin="0,0,8,0">
+                                    <TextBlock Text="Model 6 · G/G/s" FontSize="10" FontWeight="Bold" Foreground="#FFC95C"/>
+                                </Border>
+                                <TextBlock Grid.Column="1" Text="Multi-Server General Queuing Model (Allen-Cunneen General)" FontWeight="SemiBold" Foreground="{StaticResource TextPrimary}" FontSize="13" VerticalAlignment="Center"/>
+                                <Border Grid.Column="2" Background="{StaticResource StatusGreenBg}" BorderBrush="{StaticResource StatusGreenBorder}" BorderThickness="1" CornerRadius="4" Padding="6,2">
+                                    <TextBlock Text="Allen-Cunneen Multi-Server" FontSize="9.5" Foreground="{StaticResource StatusGreenText}" FontWeight="Bold"/>
+                                </Border>
+                            </Grid>
+
+                            <Border Background="#0E0D0B" BorderBrush="#2E2A23" BorderThickness="1" CornerRadius="6" Padding="12,10" Margin="0,0,0,8">
+                                <TextBlock TextWrapping="Wrap" FontFamily="Consolas" FontSize="11.5" Foreground="#DDD5C7" LineHeight="17">
+                                    <Run Foreground="{StaticResource AccentCyanBrush}" Text="Prompt: "/><Run Text="&quot;Synthesize our multi-server architecture with dual arrival and service variability: implement the multi-server G/G/s queue calculator for s parallel petrol pumps subject to non-exponential arrivals (variance σA²) and general service times (variance σS²). Check multi-server stability λ &lt; s·μ. Compute arrival variability Ca² = σA²/(1/λ)² and service variability Cs² = σS²/(1/μ)². Leverage our baseline M/M/s Erlang-C calculator to obtain Wq(M/M/s), and apply the generalized Allen-Cunneen approximation: Wq ≈ [(Ca² + Cs²)/2] × Wq(M/M/s). Derive Lq = λ·Wq, W = Wq + 1/μ, and L = λ·W, quantifying how joint variability Ca² + Cs² compounds congestion across the forecourt.&quot;"/>
+                                </TextBlock>
+                            </Border>
+                            <TextBlock Text="Result: GGsCalculator.cs, generalized Allen-Cunneen multi-server approximation combining dual variability (Ca², Cs²) with baseline Erlang-C." FontSize="11" Foreground="{StaticResource TextSecondary}"/>
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+            </Border>
+
+            <!-- SECTION 2: Core Platform & Simulation Engine Prompts -->
+            <Border Background="{StaticResource CardSurface}"
+                    BorderBrush="{StaticResource CardBorder}"
+                    BorderThickness="1" CornerRadius="10"
+                    Margin="0,0,0,20" Padding="20,16">
+                <StackPanel>
+                    <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
+                        <TextBlock Text="Platform Architecture &amp; Simulation Engine · Core System Prompts"
+                                   Style="{StaticResource CardTitle}"/>
+                        <Border Background="{StaticResource AccentBlueBrush}" CornerRadius="4" Padding="6,2" Margin="10,0,0,0" VerticalAlignment="Center">
+                            <TextBlock Text="6 System Prompts" FontSize="9.5" Foreground="White" FontWeight="Bold"/>
+                        </Border>
+                    </StackPanel>
+                    <TextBlock Text="Core engineering prompts used to construct the desktop WPF interface, discrete event simulation engine, stochastic sampling algorithms, empirical data auditing, and academic export tools."
+                               Foreground="{StaticResource TextSecondary}" FontSize="12" Margin="0,0,0,16" TextWrapping="Wrap"/>
+
+                    <!-- SYSTEM PROMPT 1: UI Foundation -->
+                    <Border Background="{StaticResource InputSurface}" BorderBrush="{StaticResource CardBorder}" BorderThickness="1" CornerRadius="8" Margin="0,0,0,14" Padding="14,12">
+                        <StackPanel>
+                            <Grid Margin="0,0,0,8">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <Border Grid.Column="0" Background="#2A2314" CornerRadius="4" Padding="6,2" Margin="0,0,8,0">
+                                    <TextBlock Text="System 1 · UI Shell" FontSize="10" FontWeight="Bold" Foreground="#FFC95C"/>
                                 </Border>
                                 <TextBlock Grid.Column="1" Text="WPF Modern Dark UI Shell &amp; Sidebar Navigation" FontWeight="SemiBold" Foreground="{StaticResource TextPrimary}" FontSize="13" VerticalAlignment="Center"/>
                                 <Border Grid.Column="2" Background="{StaticResource StatusGreenBg}" BorderBrush="{StaticResource StatusGreenBorder}" BorderThickness="1" CornerRadius="4" Padding="6,2">
@@ -56,7 +236,7 @@
                         </StackPanel>
                     </Border>
 
-                    <!-- PROMPT 2: Queue Calculator Module -->
+                    <!-- SYSTEM PROMPT 2: Calculator GUI View -->
                     <Border Background="{StaticResource InputSurface}" BorderBrush="{StaticResource CardBorder}" BorderThickness="1" CornerRadius="8" Margin="0,0,0,14" Padding="14,12">
                         <StackPanel>
                             <Grid Margin="0,0,0,8">
@@ -66,24 +246,24 @@
                                     <ColumnDefinition Width="Auto"/>
                                 </Grid.ColumnDefinitions>
                                 <Border Grid.Column="0" Background="#2A2314" CornerRadius="4" Padding="6,2" Margin="0,0,8,0">
-                                    <TextBlock Text="Phase 2 · v1.5" FontSize="10" FontWeight="Bold" Foreground="#FFC95C"/>
+                                    <TextBlock Text="System 2 · Calculator GUI" FontSize="10" FontWeight="Bold" Foreground="#FFC95C"/>
                                 </Border>
-                                <TextBlock Grid.Column="1" Text="Analytical Queue Models (M/M/1, M/M/s, M/G/1, M/D/1)" FontWeight="SemiBold" Foreground="{StaticResource TextPrimary}" FontSize="13" VerticalAlignment="Center"/>
+                                <TextBlock Grid.Column="1" Text="Queue Calculator Interactive View &amp; Real-Time Parameter Sync" FontWeight="SemiBold" Foreground="{StaticResource TextPrimary}" FontSize="13" VerticalAlignment="Center"/>
                                 <Border Grid.Column="2" Background="{StaticResource StatusGreenBg}" BorderBrush="{StaticResource StatusGreenBorder}" BorderThickness="1" CornerRadius="4" Padding="6,2">
-                                    <TextBlock Text="Math Solvers" FontSize="9.5" Foreground="{StaticResource StatusGreenText}" FontWeight="Bold"/>
+                                    <TextBlock Text="Interactive GUI" FontSize="9.5" Foreground="{StaticResource StatusGreenText}" FontWeight="Bold"/>
                                 </Border>
                             </Grid>
 
                             <Border Background="#0E0D0B" BorderBrush="#2E2A23" BorderThickness="1" CornerRadius="6" Padding="12,10" Margin="0,0,0,8">
                                 <TextBlock TextWrapping="Wrap" FontFamily="Consolas" FontSize="11.5" Foreground="#DDD5C7" LineHeight="17">
-                                    <Run Foreground="{StaticResource AccentCyanBrush}" Text="Prompt: "/><Run Text="&quot;Now build the Queue Calculator view. Based on our class syllabus, implement exact formulas for M/M/1, M/M/s (multi-server Erlang-C), M/G/1, M/D/1, M/Ek/1, plus approximations for G/G/1 and G/G/s. Let users input arrival and service rates (or mean times). Compute Lq, L, Wq, W, utilization (ρ), and state probabilities P(n) for 0 to 10 customers. Add a clear warning badge if the queue is unstable (ρ ≥ 1.0).&quot;"/>
+                                    <Run Foreground="{StaticResource AccentCyanBrush}" Text="Prompt: "/><Run Text="&quot;Build the interactive Queue Calculator view in WPF. Integrate tabs for all 6 Kendall models (M/M/1, M/M/s, M/G/1, M/G/s, G/G/1, G/G/s). Synchronize arrival rate λ and mean time 1/λ, as well as service rate μ and mean time 1/μ bidirectionally. Add a live stability badge showing ρ and a red warning when ρ ≥ 1.0. Display dynamic KPI cards for Lq, Wq, L, W, P₀, and Pw, and bind state probabilities P(n) for n = 0 to 10 into a styled DataGrid with visual progress bars.&quot;"/>
                                 </TextBlock>
                             </Border>
-                            <TextBlock Text="Result: QueuingModelsView, MM1, MMs (Erlang-C), MG1, MD1 calculators, and live stability badges." FontSize="11" Foreground="{StaticResource TextSecondary}"/>
+                            <TextBlock Text="Result: QueuingModelsView.xaml and code-behind, bidirectional unit conversions, stability badges, and styled state probability DataGrid." FontSize="11" Foreground="{StaticResource TextSecondary}"/>
                         </StackPanel>
                     </Border>
 
-                    <!-- PROMPT 3: Discrete Event Simulator -->
+                    <!-- SYSTEM PROMPT 3: DES Simulator Engine -->
                     <Border Background="{StaticResource InputSurface}" BorderBrush="{StaticResource CardBorder}" BorderThickness="1" CornerRadius="8" Margin="0,0,0,14" Padding="14,12">
                         <StackPanel>
                             <Grid Margin="0,0,0,8">
@@ -93,11 +273,11 @@
                                     <ColumnDefinition Width="Auto"/>
                                 </Grid.ColumnDefinitions>
                                 <Border Grid.Column="0" Background="#2A2314" CornerRadius="4" Padding="6,2" Margin="0,0,8,0">
-                                    <TextBlock Text="Phase 3 · v2.0" FontSize="10" FontWeight="Bold" Foreground="#FFC95C"/>
+                                    <TextBlock Text="System 3 · DES Engine" FontSize="10" FontWeight="Bold" Foreground="#FFC95C"/>
                                 </Border>
-                                <TextBlock Grid.Column="1" Text="Discrete-Event Simulation (DES) Engine &amp; Visual Charts" FontWeight="SemiBold" Foreground="{StaticResource TextPrimary}" FontSize="13" VerticalAlignment="Center"/>
+                                <TextBlock Grid.Column="1" Text="Discrete-Event Simulation (DES) Engine &amp; Custom Vector Charts" FontWeight="SemiBold" Foreground="{StaticResource TextPrimary}" FontSize="13" VerticalAlignment="Center"/>
                                 <Border Grid.Column="2" Background="{StaticResource StatusGreenBg}" BorderBrush="{StaticResource StatusGreenBorder}" BorderThickness="1" CornerRadius="4" Padding="6,2">
-                                    <TextBlock Text="DES Engine" FontSize="9.5" Foreground="{StaticResource StatusGreenText}" FontWeight="Bold"/>
+                                    <TextBlock Text="DES &amp; Vector Charts" FontSize="9.5" Foreground="{StaticResource StatusGreenText}" FontWeight="Bold"/>
                                 </Border>
                             </Grid>
 
@@ -110,7 +290,7 @@
                         </StackPanel>
                     </Border>
 
-                    <!-- PROMPT 4: Field Observations & Chi-Square -->
+                    <!-- SYSTEM PROMPT 4: Forecourt Calibration & Fleet Mix -->
                     <Border Background="{StaticResource InputSurface}" BorderBrush="{StaticResource CardBorder}" BorderThickness="1" CornerRadius="8" Margin="0,0,0,14" Padding="14,12">
                         <StackPanel>
                             <Grid Margin="0,0,0,8">
@@ -120,9 +300,36 @@
                                     <ColumnDefinition Width="Auto"/>
                                 </Grid.ColumnDefinitions>
                                 <Border Grid.Column="0" Background="#2A2314" CornerRadius="4" Padding="6,2" Margin="0,0,8,0">
-                                    <TextBlock Text="Phase 4 · v2.5" FontSize="10" FontWeight="Bold" Foreground="#FFC95C"/>
+                                    <TextBlock Text="System 4 · Forecourt Logic" FontSize="10" FontWeight="Bold" Foreground="#FFC95C"/>
                                 </Border>
-                                <TextBlock Grid.Column="1" Text="Observation Dataset &amp; Chi-Square Test" FontWeight="SemiBold" Foreground="{StaticResource TextPrimary}" FontSize="13" VerticalAlignment="Center"/>
+                                <TextBlock Grid.Column="1" Text="Site Forecourt Calibration &amp; 70/30 Vehicle Fleet Mix" FontWeight="SemiBold" Foreground="{StaticResource TextPrimary}" FontSize="13" VerticalAlignment="Center"/>
+                                <Border Grid.Column="2" Background="{StaticResource StatusGreenBg}" BorderBrush="{StaticResource StatusGreenBorder}" BorderThickness="1" CornerRadius="4" Padding="6,2">
+                                    <TextBlock Text="Forecourt Behavioral Logic" FontSize="9.5" Foreground="{StaticResource StatusGreenText}" FontWeight="Bold"/>
+                                </Border>
+                            </Grid>
+
+                            <Border Background="#0E0D0B" BorderBrush="#2E2A23" BorderThickness="1" CornerRadius="6" Padding="12,10" Margin="0,0,0,8">
+                                <TextBlock TextWrapping="Wrap" FontFamily="Consolas" FontSize="11.5" Foreground="#DDD5C7" LineHeight="17">
+                                    <Run Foreground="{StaticResource AccentCyanBrush}" Text="Prompt: "/><Run Text="&quot;Model the real-world operational rules of the Shell Maskan petrol pump forecourt in C#. Implement a fleet mix parameter of 70% motorcycles and 30% cars. Set motorcycle service to Exp(35s) and car service to Exp(85s). Implement bifurcated lane routing: 100% of bikes and 50% of cars pay cash at the 4B fast-exit lane, while the remaining 15% of cars use 4A-POS card/QR payment with an added Uniform[10, 25]s terminal delay. Route incoming vehicles to the pump island with the shortest queue.&quot;"/>
+                                </TextBlock>
+                            </Border>
+                            <TextBlock Text="Result: ForecourtSimulator.cs, 70/30 motorcycle/car fleet calibration, 4B-Cash vs 4A-POS payment branching, and shortest-queue routing heuristics." FontSize="11" Foreground="{StaticResource TextSecondary}"/>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- SYSTEM PROMPT 5: Empirical Data & Chi-Square -->
+                    <Border Background="{StaticResource InputSurface}" BorderBrush="{StaticResource CardBorder}" BorderThickness="1" CornerRadius="8" Margin="0,0,0,14" Padding="14,12">
+                        <StackPanel>
+                            <Grid Margin="0,0,0,8">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <Border Grid.Column="0" Background="#2A2314" CornerRadius="4" Padding="6,2" Margin="0,0,8,0">
+                                    <TextBlock Text="System 5 · Statistical Testing" FontSize="10" FontWeight="Bold" Foreground="#FFC95C"/>
+                                </Border>
+                                <TextBlock Grid.Column="1" Text="Empirical Dataset, Outlier Detection &amp; Chi-Square Test" FontWeight="SemiBold" Foreground="{StaticResource TextPrimary}" FontSize="13" VerticalAlignment="Center"/>
                                 <Border Grid.Column="2" Background="{StaticResource StatusGreenBg}" BorderBrush="{StaticResource StatusGreenBorder}" BorderThickness="1" CornerRadius="4" Padding="6,2">
                                     <TextBlock Text="Data &amp; Hypothesis Test" FontSize="9.5" Foreground="{StaticResource StatusGreenText}" FontWeight="Bold"/>
                                 </Border>
@@ -137,7 +344,7 @@
                         </StackPanel>
                     </Border>
 
-                    <!-- PROMPT 5: Comparison View & Sensitivity -->
+                    <!-- SYSTEM PROMPT 6: Comparison View & LaTeX Export -->
                     <Border Background="{StaticResource InputSurface}" BorderBrush="{StaticResource CardBorder}" BorderThickness="1" CornerRadius="8" Margin="0,0,0,0" Padding="14,12">
                         <StackPanel>
                             <Grid Margin="0,0,0,8">
@@ -147,7 +354,7 @@
                                     <ColumnDefinition Width="Auto"/>
                                 </Grid.ColumnDefinitions>
                                 <Border Grid.Column="0" Background="#2A2314" CornerRadius="4" Padding="6,2" Margin="0,0,8,0">
-                                    <TextBlock Text="Phase 5 · v3.0" FontSize="10" FontWeight="Bold" Foreground="#FFC95C"/>
+                                    <TextBlock Text="System 6 · Benchmarking" FontSize="10" FontWeight="Bold" Foreground="#FFC95C"/>
                                 </Border>
                                 <TextBlock Grid.Column="1" Text="Model Comparison, Sensitivity Curves &amp; LaTeX Export" FontWeight="SemiBold" Foreground="{StaticResource TextPrimary}" FontSize="13" VerticalAlignment="Center"/>
                                 <Border Grid.Column="2" Background="{StaticResource StatusGreenBg}" BorderBrush="{StaticResource StatusGreenBorder}" BorderThickness="1" CornerRadius="4" Padding="6,2">

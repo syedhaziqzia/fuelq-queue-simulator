@@ -1,12 +1,28 @@
-# FuelQ — Shell Petrol Pump Maskan Branch Simulator
+<div align="center">
 
-A high-performance Windows desktop application built with **WPF and .NET 10** for the Modeling & Simulation semester project (**Group G, BSCS 6th Semester, UBIT, University of Karachi**).
+<img src="Assets/AppLogo-rounded.png" alt="FuelQ Logo" width="120" height="120" />
 
-FuelQ models, analyzes, and simulates the multi-server stochastic vehicle queuing system at the **Shell Petrol Pump forecourt located at Maskan Chowrangi, Gulshan-e-Iqbal, Karachi**.
+# FuelQ — Forecourt Queueing & Simulation Studio
+
+**A high-performance Windows desktop application built with WPF and .NET 10 for the Modeling & Simulation semester project (Group G, BSCS 6th Semester, UBIT, University of Karachi).**
+
+*Models, analyzes, and simulates the multi-server stochastic vehicle queuing system at the Shell Petrol Pump forecourt located at Maskan Chowrangi, Gulshan-e-Iqbal, Karachi.*
+
+[![Tests](https://img.shields.io/badge/Tests-54%20passing-brightgreen)](Tests/FuelQ.Tests)
+[![.NET](https://img.shields.io/badge/.NET-10.0+-512BD4?logo=dotnet)](https://dotnet.microsoft.com/)
+[![C#](https://img.shields.io/badge/C%23-14-239120?logo=csharp)](https://learn.microsoft.com/en-us/dotnet/csharp/)
+[![WPF](https://img.shields.io/badge/UI-WPF%20Native-0078D4?logo=windows)](https://learn.microsoft.com/en-us/dotnet/desktop/wpf/)
+[![License](https://img.shields.io/badge/License-MIT-007EC6)](LICENSE)
+[![Dependencies](https://img.shields.io/badge/Dependencies-Zero%20External%20NuGet-2ea44f)](FuelQ.csproj)
+
+</div>
 
 ---
 
 ## 🚀 How to Set Up & Run (Beginner-Friendly Guide)
+
+> [!NOTE]
+> **Windows Only:** The FuelQ desktop application is built with **WPF (`net10.0-windows`)** and runs **only on Windows** (Windows 10 / 11). *(The CLI test suite in `Tests/FuelQ.Tests` targets `net10.0` and works cross-platform.)*
 
 If you have downloaded or cloned this project from GitHub and are using **VS Code** (or Windows PowerShell), follow these simple steps to get the app running:
 
@@ -43,7 +59,7 @@ To run any C# program, your computer needs the free **.NET SDK** from Microsoft.
 ### Step 3: Open and Run FuelQ
 
 1. **Open the Project Folder:**
-   In VS Code, go to **File $\rightarrow$ Open Folder...** and select the downloaded `FuelQ` folder.
+   In VS Code, go to **File $\rightarrow$ Open Folder...** and select the cloned or downloaded `fuelq-queue-simulator` folder.
 
 2. **Open the Integrated Terminal:**
    Press ``Ctrl + ` `` (backtick) or go to **Terminal $\rightarrow$ New Terminal**.
@@ -62,38 +78,38 @@ To run any C# program, your computer needs the free **.NET SDK** from Microsoft.
 
 ## 🖼️ Application Preview
 
-### 1. Home Dashboard & Overview
-*Comprehensive project background, supervisor information, navigation cards, and academic context.*
+### 1. Home Dashboard & Live Forecourt Demo
+*Live animated Shell Maskan forecourt demonstration, workflow guide, tool navigation cards, site baseline, and Group G team roster.*
 
-![FuelQ Home and Project Overview](Assets/screenshot-01.png)
-
----
-
-### 2. Project Team & Operational Baseline
-*Team member details, site baseline metrics (2-4 multi-server pumps, mean headway, stability guarantee).*
-
-![Project Team and Forecourt Baseline](Assets/screenshot-02.png)
+![FuelQ Home Dashboard and Live Demo](Assets/screenshot-01.png)
 
 ---
 
-### 3. Queueing Model Calculator
-*Analytical solvers across Kendall models with live traffic intensity, utilization badges, and distribution parameters.*
+### 2. Queueing Model Calculator
+*Analytical solvers across 6 Kendall models (M/M/1, M/M/s, M/G/1, M/G/s, G/G/1, G/G/s) with live traffic intensity, utilization, and stability badges.*
 
-![Queueing Model Calculator](Assets/screenshot-03.png)
-
----
-
-### 4. Discrete Event Simulator (DES) Configuration
-*Event-driven stochastic simulation engine with custom distributions (Exponential, Normal, Uniform, Gamma) and KPI cards.*
-
-![Discrete Event Simulator Configuration](Assets/screenshot-04.png)
+![Queueing Model Calculator](Assets/screenshot-02.png)
 
 ---
 
-### 5. Simulation Verification & Interactive Charts
-*Theoretical vs. Simulated side-by-side delta error validation, dynamic Queue Length timeline Q(t), and Waiting Time Histogram.*
+### 3. Discrete Event Simulator (DES)
+*Event-driven stochastic simulation engine with custom distributions (Exponential, Normal, Uniform, Gamma), KPI cards, and theoretical verification.*
 
-![Simulation Comparison and Charts](Assets/screenshot-05.png)
+![Discrete Event Simulator](Assets/screenshot-03.png)
+
+---
+
+### 4. Empirical Data & Chi-Square Goodness-of-Fit
+*320-vehicle dataset table, IQR outlier detection, observed distribution histograms, and Pearson Chi-Square (χ²) test report.*
+
+![Empirical Data and Chi-Square Test](Assets/screenshot-04.png)
+
+---
+
+### 5. Model Comparison & Congestion Sensitivity
+*Side-by-side analytical vs. DES simulation matrix, Lq vs. ρ congestion sensitivity curve, and forecourt efficiency gain metrics.*
+
+![Model Comparison and Sensitivity Curve](Assets/screenshot-05.png)
 
 ---
 
@@ -126,9 +142,11 @@ To run any C# program, your computer needs the free **.NET SDK** from Microsoft.
 ## 🏗️ Repository Structure
 
 ```
-FuelQ/
-├── Assets/                        # Visual assets (app logo, UI screenshots)
+fuelq-queue-simulator/
+├── Assets/                        # Visual assets (app icon, logo, UI screenshots)
+│   ├── AppIcon.ico
 │   ├── AppLogo.jpg
+│   ├── AppLogo-rounded.png
 │   └── screenshot-01..05.png
 ├── Controls/                      # Custom WPF DrawingContext vector charts
 │   └── SimpleWpfChart.cs
@@ -148,7 +166,7 @@ FuelQ/
 
 ## 🧪 Testing
 
-The calculation and simulation logic has an automated verification suite that needs no extra packages. From the `FuelQ` folder, run:
+The calculation and simulation logic has an automated verification suite that needs no extra packages. From the `fuelq-queue-simulator` folder, run:
 
 ```bash
 dotnet run --project Tests/FuelQ.Tests
@@ -178,11 +196,6 @@ It prints `PASS` / `FAIL` for each check and ends with a summary (exit code 0 me
 ---
 
 ## 📄 License & Specifications
-
-[![.NET 10](https://img.shields.io/badge/.NET-10.0-512BD4?logo=dotnet)](https://dotnet.microsoft.com/)
-[![WPF](https://img.shields.io/badge/WPF-Windows-0078D4?logo=windows)](https://learn.microsoft.com/en-us/dotnet/desktop/wpf/)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![Dependencies](https://img.shields.io/badge/Dependencies-Zero%20External%20NuGet-success)](FuelQ.csproj)
 
 This project is licensed under the [MIT License](LICENSE).
 Feel free to use and adapt this project for academic and educational purposes.

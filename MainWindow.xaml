@@ -6,7 +6,7 @@
         MinHeight="660" MinWidth="980"
         Background="{StaticResource CanvasBackground}"
         WindowStartupLocation="CenterScreen"
-        Icon="/Assets/AppLogo.jpg"
+        Icon="/Assets/AppIcon.ico"
         FontFamily="{StaticResource BodyFont}"
         TextOptions.TextFormattingMode="Display">
 
