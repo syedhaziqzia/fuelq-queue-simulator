@@ -237,7 +237,3 @@ It prints `PASS` / `FAIL` for each check and ends with a summary (exit code 0 me
 
 This project is licensed under the [MIT License](LICENSE).
 Feel free to use and adapt this project for academic and educational purposes.
-
----
-
-*FuelQ — Modeling real-world queuing theory, one pump at a time.*
