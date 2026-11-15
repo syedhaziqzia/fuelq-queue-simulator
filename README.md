@@ -56,15 +56,23 @@ To run any C# program, your computer needs the free **.NET SDK** from Microsoft.
 
 ---
 
-### Step 3: Open and Run FuelQ
+### Step 3: Clone, Open, and Run FuelQ
 
-1. **Open the Project Folder:**
+1. **Clone (or Download) the Repository:**
+   Open PowerShell or your terminal and run:
+   ```bash
+   git clone https://github.com/syedhaziqzia/fuelq-queue-simulator.git
+   cd fuelq-queue-simulator
+   ```
+   *(Or click **Code → Download ZIP** on GitHub and extract the folder.)*
+
+2. **Open the Project Folder:**
    In VS Code, go to **File $\rightarrow$ Open Folder...** and select the cloned or downloaded `fuelq-queue-simulator` folder.
 
-2. **Open the Integrated Terminal:**
+3. **Open the Integrated Terminal:**
    Press ``Ctrl + ` `` (backtick) or go to **Terminal $\rightarrow$ New Terminal**.
 
-3. **Run the Project:**
+4. **Run the Project:**
    Type the following command and press **Enter**:
    ```bash
    dotnet run
