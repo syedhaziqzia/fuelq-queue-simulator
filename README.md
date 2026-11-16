@@ -166,6 +166,9 @@ To run any C# program, your computer needs the free **.NET SDK** from Microsoft.
 
 ## 🔄 Architecture & Data Flow
 
+<div align="center">
+<table><tr><td>
+
 ```text
   ┌──────────────────────────┐
   │      Empirical Data      │
@@ -195,6 +198,9 @@ To run any C# program, your computer needs the free **.NET SDK** from Microsoft.
   │      & LaTeX Export      │
   └──────────────────────────┘
 ```
+
+</td></tr></table>
+</div>
 
 ---
 
