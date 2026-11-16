@@ -166,13 +166,34 @@ To run any C# program, your computer needs the free **.NET SDK** from Microsoft.
 
 ## 🔄 Architecture & Data Flow
 
-```mermaid
-flowchart LR
-    A["Empirical Data\n(CSV / 320-Row Synthetic)"] --> B["IQR Outliers &\nPearson χ² Test"]
-    B --> C["Analytical Solvers\n(M/M/1 .. G/G/s)"]
-    B --> D["DES Engine\n(Table & Forecourt)"]
-    C --> E["Model Comparison\n& LaTeX Export"]
-    D --> E
+```text
+  ┌──────────────────────────┐
+  │      Empirical Data      │
+  │ (CSV / 320-Row Synthetic)│
+  └────────────┬─────────────┘
+               │
+               ▼
+  ┌──────────────────────────┐
+  │      IQR Outliers &      │
+  │     Pearson χ² Test      │
+  └────────────┬─────────────┘
+               │
+       ┌───────┴───────┐
+       │               │
+       ▼               ▼
+┌──────────────┐ ┌──────────────┐
+│  Analytical  │ │  DES Engine  │
+│   Solvers    │ │   (Table &   │
+│(M/M/1..G/G/s)│ │  Forecourt)  │
+└──────┬───────┘ └──────┬───────┘
+       │                │
+       └───────┬────────┘
+               │
+               ▼
+  ┌──────────────────────────┐
+  │     Model Comparison     │
+  │      & LaTeX Export      │
+  └──────────────────────────┘
 ```
 
 ---
