@@ -16,17 +16,19 @@
 [![Dependencies](https://img.shields.io/badge/Dependencies-Zero%20External%20NuGet-2ea44f)](FuelQ.csproj)
 
 <p>
-  <a href="#-how-to-set-up--run-beginner-friendly-guide">Setup</a> ·
-  <a href="#-application-preview">Preview</a> ·
-  <a href="#-key-features">Features</a> ·
-  <a href="#-mathematical-formulas-reference">Formulas</a> ·
-  <a href="#-architecture--data-flow">Architecture</a> ·
-  <a href="#-testing">Testing</a>
+  <a href="#setup">Setup</a> ·
+  <a href="#preview">Preview</a> ·
+  <a href="#features">Features</a> ·
+  <a href="#formulas">Formulas</a> ·
+  <a href="#architecture">Architecture</a> ·
+  <a href="#testing">Testing</a>
 </p>
 
 </div>
 
 ---
+
+<a id="setup"></a>
 
 ## 🚀 How to Set Up & Run (Beginner-Friendly Guide)
 
@@ -93,6 +95,8 @@ To run any C# program, your computer needs the free **.NET SDK** from Microsoft.
 
 ---
 
+<a id="preview"></a>
+
 ## 🖼️ Application Preview
 
 ### 1. Home Dashboard & Live Forecourt Demo
@@ -138,6 +142,8 @@ To run any C# program, your computer needs the free **.NET SDK** from Microsoft.
 
 ---
 
+<a id="features"></a>
+
 ## 🌟 Key Features
 
 * **Analytical Queueing Solvers:** Exact and approximation solutions for 8 Kendall models: **M/M/1**, **M/M/s** (Erlang-C), **M/G/1** (Pollaczek-Khinchine), **M/G/s** (Allen-Cunneen), **G/G/1** (Kingman), **G/G/s**, **M/D/1**, and **M/E<sub>k</sub>/1**.
@@ -148,6 +154,8 @@ To run any C# program, your computer needs the free **.NET SDK** from Microsoft.
 * **AI Prompts & Engineering Audit:** Complete transparency log of prompt engineering and architectural validation.
 
 ---
+
+<a id="formulas"></a>
 
 ## 📐 Mathematical Formulas Reference
 
@@ -163,6 +171,8 @@ To run any C# program, your computer needs the free **.NET SDK** from Microsoft.
 | **M/Ek/1** | `Lq = [(1 + k) / (2k)] · [ρ² / (1 - ρ)]` *(Erlang-k service)* | Exact closed-form |
 
 ---
+
+<a id="architecture"></a>
 
 ## 🔄 Architecture & Data Flow
 
@@ -228,6 +238,8 @@ fuelq-queue-simulator/
 ```
 
 ---
+
+<a id="testing"></a>
 
 ## 🧪 Testing
 
