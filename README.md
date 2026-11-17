@@ -176,41 +176,18 @@ To run any C# program, your computer needs the free **.NET SDK** from Microsoft.
 
 ## 🔄 Architecture & Data Flow
 
-<div align="center">
-<table><tr><td>
-
 ```text
-  ┌──────────────────────────┐
-  │      Empirical Data      │
-  │ (CSV / 320-Row Synthetic)│
-  └────────────┬─────────────┘
-               │
-               ▼
-  ┌──────────────────────────┐
-  │      IQR Outliers &      │
-  │     Pearson χ² Test      │
-  └────────────┬─────────────┘
-               │
-       ┌───────┴───────┐
-       │               │
-       ▼               ▼
-┌──────────────┐ ┌──────────────┐
-│  Analytical  │ │  DES Engine  │
-│   Solvers    │ │   (Table &   │
-│(M/M/1..G/G/s)│ │  Forecourt)  │
-└──────┬───────┘ └──────┬───────┘
-       │                │
-       └───────┬────────┘
-               │
-               ▼
-  ┌──────────────────────────┐
-  │     Model Comparison     │
-  │      & LaTeX Export      │
-  └──────────────────────────┘
+  Empirical Data (CSV / Synthetic)
+                │
+                ▼
+  IQR Outliers & Pearson χ² Test
+                │
+                ▼
+  Analytical Solvers & DES Engine
+                │
+                ▼
+  Model Comparison & LaTeX Export
 ```
-
-</td></tr></table>
-</div>
 
 ---
 
