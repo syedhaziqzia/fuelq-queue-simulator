@@ -176,18 +176,17 @@ To run any C# program, your computer needs the free **.NET SDK** from Microsoft.
 
 ## 🔄 Architecture & Data Flow
 
-```text
-  Empirical Data (CSV / Synthetic)
-                │
-                ▼
-  IQR Outliers & Pearson χ² Test
-                │
-                ▼
-  Analytical Solvers & DES Engine
-                │
-                ▼
-  Model Comparison & LaTeX Export
-```
+<div align="center">
+
+`Empirical Data (CSV / Synthetic)`
+<br>↓<br>
+`IQR Outliers & Pearson χ² Test`
+<br>↓<br>
+`Analytical Solvers & DES Engine`
+<br>↓<br>
+`Model Comparison & LaTeX Export`
+
+</div>
 
 ---
 
